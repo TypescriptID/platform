@@ -1,13 +1,14 @@
-import { ActionSanitizer, StateSanitizer } from './config';
 import { Action } from '@ngrx/store';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+
+import * as Actions from './actions';
+import { ActionSanitizer, StateSanitizer } from './config';
 import {
-  LiftedState,
+  ComputedState,
   LiftedAction,
   LiftedActions,
-  ComputedState,
+  LiftedState,
 } from './reducer';
-import * as Actions from './actions';
 
 export function difference(first: any[], second: any[]) {
   return first.filter(item => second.indexOf(item) < 0);
@@ -31,16 +32,7 @@ export function unliftAction(liftedState: LiftedState): LiftedAction {
  * Lifts an app's action into an action on the lifted store.
  */
 export function liftAction(action: Action) {
-  return new Actions.PerformAction(action);
-}
-
-export function applyOperators(
-  input$: Observable<any>,
-  operators: any[][]
-): Observable<any> {
-  return operators.reduce((source$, [operator, ...args]) => {
-    return operator.apply(source$, args);
-  }, input$);
+  return new Actions.PerformAction(action, +Date.now());
 }
 
 /**
