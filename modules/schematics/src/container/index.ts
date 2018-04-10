@@ -20,6 +20,7 @@ import { buildRelativePath } from '../utility/find-module';
 import { NoopChange, InsertChange, ReplaceChange } from '../utility/change';
 import { insertImport } from '../utility/route-utils';
 import { omit } from '../utility/ngrx-utils';
+import { getProjectPath } from '../utility/project';
 
 function addStateToComponent(options: ContainerOptions) {
   return (host: Tree) => {
@@ -27,16 +28,16 @@ function addStateToComponent(options: ContainerOptions) {
       return host;
     }
 
-    const statePath = `/${options.sourceDir}/${options.path}/${options.state}`;
+    const statePath = `/${options.path}/${options.state}`;
 
     if (options.state) {
       if (!host.exists(statePath)) {
-        throw new Error('Specified state path does not exist');
+        throw new Error(`The Specified state path ${statePath} does not exist`);
       }
     }
 
     const componentPath =
-      `/${options.sourceDir}/${options.path}/` +
+      `/${options.path}/` +
       (options.flat ? '' : stringUtils.dasherize(options.name) + '/') +
       stringUtils.dasherize(options.name) +
       '.component.ts';
@@ -116,11 +117,7 @@ function addStateToComponent(options: ContainerOptions) {
 
 export default function(options: ContainerOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
-    const sourceDir = options.sourceDir;
-
-    if (!sourceDir) {
-      throw new SchematicsException(`sourceDir option is required.`);
-    }
+    options.path = getProjectPath(host, options);
 
     const opts = ['state', 'stateInterface'].reduce(
       (current: Partial<ContainerOptions>, key) => {
@@ -137,7 +134,6 @@ export default function(options: ContainerOptions): Rule {
         ...(options as object),
         dot: () => '.',
       } as any),
-      move(sourceDir),
     ]);
 
     return chain([
