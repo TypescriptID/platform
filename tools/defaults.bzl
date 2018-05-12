@@ -2,11 +2,13 @@
 load("@build_bazel_rules_typescript//:defs.bzl", _ts_library="ts_library")
 load("@angular//:index.bzl", _ng_module="ng_module", _ng_package="ng_package")
 load("@build_bazel_rules_nodejs//:defs.bzl",
-     _jasmine_node_test="jasmine_node_test")
+     _jasmine_node_test="jasmine_node_test", _npm_package="npm_package")
 
 DEFAULT_TSCONFIG = "//:tsconfig.json"
 NG_VERSION = "^6.0.0"
 RXJS_VERSION = "^5.6.0-forward-compat.0 || ^6.0.0"
+NG_DEVKIT_VERSION = "^0.6.0"
+NG_UPDATE_MIGRATIONS = "./migrations/migration.json"
 
 NGRX_SCOPED_PACKAGES = ["@ngrx/%s" % p for p in [
     "effects",
@@ -26,7 +28,9 @@ PKG_GROUP_REPLACEMENTS = {
     "RXJS_VERSION": RXJS_VERSION,
     "\"NG_UPDATE_PACKAGE_GROUP\"": """[
       %s
-    ]""" % ",\n      ".join(["\"%s\"" % s for s in NGRX_SCOPED_PACKAGES])
+    ]""" % ",\n      ".join(["\"%s\"" % s for s in NGRX_SCOPED_PACKAGES]),
+    "NG_DEVKIT_VERSION": NG_DEVKIT_VERSION,
+    "NG_UPDATE_MIGRATIONS": NG_UPDATE_MIGRATIONS
 }
 
 
@@ -72,3 +76,9 @@ def ng_package(name, readme_md=None, license_banner=None, globals={}, **kwargs):
         globals=dict(globals, **NGRX_GLOBALS),
         replacements=PKG_GROUP_REPLACEMENTS,
         **kwargs)
+
+def npm_package(name, replacements = {}, **kwargs):
+  _npm_package(
+      name = name,
+      replacements = dict(replacements, **PKG_GROUP_REPLACEMENTS),
+      **kwargs)
