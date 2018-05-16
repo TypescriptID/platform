@@ -12,6 +12,7 @@ import {
   template,
   url,
 } from '@angular-devkit/schematics';
+import { Path, dirname } from '@angular-devkit/core';
 import * as ts from 'typescript';
 import {
   stringUtils,
@@ -22,6 +23,7 @@ import {
   getProjectPath,
   findModuleFromOptions,
   addImportToModule,
+  parseName,
 } from '@ngrx/schematics/schematics-core';
 import { Schema as StoreOptions } from './schema';
 
@@ -52,9 +54,10 @@ function addImportToNgModule(options: StoreOptions): Rule {
 
     const statePath = `${options.path}/${options.statePath}`;
     const relativePath = buildRelativePath(modulePath, statePath);
+    const srcPath = dirname(options.path as Path);
     const environmentsPath = buildRelativePath(
       statePath,
-      `/${options.path}/environments/environment`
+      `${srcPath}/environments/environment`
     );
 
     const storeNgModuleImport = addImportToModule(
@@ -129,10 +132,15 @@ export default function(options: StoreOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     options.path = getProjectPath(host, options);
 
+    const parsedPath = parseName(options.path, options.name);
+    options.name = parsedPath.name;
+    options.path = parsedPath.path;
+
     const statePath = `/${options.path}/${options.statePath}/index.ts`;
+    const srcPath = dirname(options.path as Path);
     const environmentsPath = buildRelativePath(
       statePath,
-      `/${options.path}/environments/environment`
+      `${srcPath}/environments/environment`
     );
 
     if (options.module) {
@@ -153,6 +161,7 @@ export default function(options: StoreOptions): Rule {
         ...(options as object),
         environmentsPath,
       } as any),
+      move(parsedPath.path),
     ]);
 
     return chain([
