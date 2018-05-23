@@ -31,14 +31,7 @@ export {
   ReplaceChange,
 } from './utility/change';
 
-export {
-  AppConfig,
-  CliConfig,
-  getAppFromConfig,
-  getConfig,
-  getWorkspace,
-  getWorkspacePath,
-} from './utility/config';
+export { AppConfig, getWorkspace, getWorkspacePath } from './utility/config';
 
 export {
   findModule,
@@ -70,4 +63,9 @@ export const stringUtils = {
 };
 
 export { updatePackage } from './utility/update';
+
 export { parseName } from './utility/parse-name';
+
+export { addPackageToPackageJson } from './utility/package';
+
+export { platformVersion } from './utility/libs-version';

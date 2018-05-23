@@ -1,11 +1,10 @@
 {
   "name": "@ngrx/platform",
-  "version": "6.0.0-beta.3",
+  "version": "6.0.1",
   "description": "monorepo for ngrx development",
   "scripts": {
     "precommit": "lint-staged",
     "bootstrap": "lerna bootstrap",
-    "prebuild": "yarn copy:schematics",
     "build": "bazel build ...",
     "deploy:builds": "ts-node ./build/deploy-build.ts",
     "test:unit": "node ./tests.js",
@@ -56,6 +55,7 @@
       "**/*.spec",
       "**/spec/**/*",
       "/modules/schematics/src/*/files/**/*",
+      "/modules/**/schematics/**/files/**/*",
       "**/schematics/src/utility/*"
     ],
     "include": [

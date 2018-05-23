@@ -8,9 +8,9 @@ import {
   chain,
   filter,
   mergeWith,
-  move,
   template,
   url,
+  move,
 } from '@angular-devkit/schematics';
 import { Path, dirname } from '@angular-devkit/core';
 import * as ts from 'typescript';

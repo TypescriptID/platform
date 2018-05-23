@@ -9,6 +9,7 @@ NG_VERSION = "^6.0.0"
 RXJS_VERSION = "^5.6.0-forward-compat.0 || ^6.0.0"
 NG_DEVKIT_VERSION = "^0.6.0"
 NG_UPDATE_MIGRATIONS = "./migrations/migration.json"
+MODULE_SCHEMATICS_COLLECTION = "./schematics/collection.json"
 
 NGRX_SCOPED_PACKAGES = ["@ngrx/%s" % p for p in [
     "store",
@@ -30,7 +31,8 @@ PKG_GROUP_REPLACEMENTS = {
       %s
     ]""" % ",\n      ".join(["\"%s\"" % s for s in NGRX_SCOPED_PACKAGES]),
     "NG_DEVKIT_VERSION": NG_DEVKIT_VERSION,
-    "NG_UPDATE_MIGRATIONS": NG_UPDATE_MIGRATIONS
+    "NG_UPDATE_MIGRATIONS": NG_UPDATE_MIGRATIONS,
+    "MODULE_SCHEMATICS_COLLECTION": MODULE_SCHEMATICS_COLLECTION,
 }
 
 
