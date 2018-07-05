@@ -330,7 +330,8 @@ export function liftReducerWith(
           skippedActionIds,
           committedState,
           currentStateIndex,
-          computedStates,
+          // prettier-ignore
+          computedStates
         } = liftedAction.nextLiftedState);
         break;
       }
