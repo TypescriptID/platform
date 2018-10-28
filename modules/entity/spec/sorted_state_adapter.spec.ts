@@ -99,7 +99,7 @@ describe('Sorted State Adapter', () => {
     });
   });
 
-  it('should let you remove many entities from the state', () => {
+  it('should let you remove many entities by id from the state', () => {
     const withAll = adapter.addAll(
       [TheGreatGatsby, AClockworkOrange, AnimalFarm],
       state
@@ -114,6 +114,22 @@ describe('Sorted State Adapter', () => {
       ids: [AnimalFarm.id],
       entities: {
         [AnimalFarm.id]: AnimalFarm,
+      },
+    });
+  });
+
+  it('should let you remove many entities by a predicate from the state', () => {
+    const withAll = adapter.addAll(
+      [TheGreatGatsby, AClockworkOrange, AnimalFarm],
+      state
+    );
+
+    const withoutMany = adapter.removeMany(p => p.id.startsWith('a'), withAll);
+
+    expect(withoutMany).toEqual({
+      ids: [TheGreatGatsby.id],
+      entities: {
+        [TheGreatGatsby.id]: TheGreatGatsby,
       },
     });
   });
@@ -264,7 +280,7 @@ describe('Sorted State Adapter', () => {
     });
   });
 
-  it('should let you update many entities in the state', () => {
+  it('should let you update many entities by id in the state', () => {
     const firstChange = { title: 'Zack' };
     const secondChange = { title: 'Aaron' };
     const withMany = adapter.addAll([TheGreatGatsby, AClockworkOrange], state);
@@ -280,6 +296,41 @@ describe('Sorted State Adapter', () => {
     expect(withUpdates).toEqual({
       ids: [AClockworkOrange.id, TheGreatGatsby.id],
       entities: {
+        [TheGreatGatsby.id]: {
+          ...TheGreatGatsby,
+          ...firstChange,
+        },
+        [AClockworkOrange.id]: {
+          ...AClockworkOrange,
+          ...secondChange,
+        },
+      },
+    });
+  });
+
+  it('should let you map over entities in the state', () => {
+    const firstChange = { ...TheGreatGatsby, title: 'First change' };
+    const secondChange = { ...AClockworkOrange, title: 'Second change' };
+
+    const withMany = adapter.addAll(
+      [TheGreatGatsby, AClockworkOrange, AnimalFarm],
+      state
+    );
+
+    const withUpdates = adapter.map(
+      book =>
+        book.title === TheGreatGatsby.title
+          ? firstChange
+          : book.title === AClockworkOrange.title
+            ? secondChange
+            : book,
+      withMany
+    );
+
+    expect(withUpdates).toEqual({
+      ids: [AnimalFarm.id, TheGreatGatsby.id, AClockworkOrange.id],
+      entities: {
+        [AnimalFarm.id]: AnimalFarm,
         [TheGreatGatsby.id]: {
           ...TheGreatGatsby,
           ...firstChange,
