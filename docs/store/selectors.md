@@ -7,7 +7,7 @@
 
 Selectors are methods used for obtaining slices of store state. @ngrx/store provides a few helper functions for optimizing this selection.
 
-When using the `createSelector` and `createFeatureSelector`functions @ngrx/store keeps track of the latest arguments in which your selector function was invoked. Because selectors are [pure functions](https://en.wikipedia.org/wiki/Pure_function), the last result can be returned when the arguments match without reinvoking your selector function. This can provide performance benefits, particularly with selectors that perform expensive computation. This practice is known as [memoization](https://en.wikipedia.org/wiki/Memoization).
+When using the `createSelector` and `createFeatureSelector` functions @ngrx/store keeps track of the latest arguments in which your selector function was invoked. Because selectors are [pure functions](https://en.wikipedia.org/wiki/Pure_function), the last result can be returned when the arguments match without reinvoking your selector function. This can provide performance benefits, particularly with selectors that perform expensive computation. This practice is known as [memoization](https://en.wikipedia.org/wiki/Memoization).
 
 ## createSelector
 
@@ -108,7 +108,7 @@ ngOnInit() {
 }
 ```
 
-Keep in mind that a selector only keeps the previous input arguments in its cache. If you re-use this selector with another another multiply factor, the selector would always have to re-evaluate its value. This is because it's receiving both of the multiply factors (e.g. one time `2`, the other time `4`). In order to correctly memoize the selector, wrap the selector inside a factory function to create different instances of the selector.
+Keep in mind that a selector only keeps the previous input arguments in its cache. If you re-use this selector with another multiply factor, the selector would always have to re-evaluate its value. This is because it's receiving both of the multiply factors (e.g. one time `2`, the other time `4`). In order to correctly memoize the selector, wrap the selector inside a factory function to create different instances of the selector.
 
 The following is an example of using multiple counters differentiated by `id`.
 
@@ -370,7 +370,7 @@ export const selectLastStateTransitions = (count: number) => {
     scan((acc, curr) => {
       return [ curr, acc[0], acc[1] ].filter(val => val !== undefined);
     } [] as {foo: number; bar: string}[]) // XX: Explicit type hint for the array.
-                                          // Equivalent to what is emitted by the selelctor
+                                          // Equivalent to what is emitted by the selector
   );
 }
 ```
