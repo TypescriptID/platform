@@ -5,8 +5,16 @@ context('Full round trip', () => {
       testName: 'round-trip',
       browser: { width: 800, height: 600 },
     });
-    window.indexedDB.deleteDatabase('books_app');
+    window.localStorage.removeItem('books_app');
     cy.visit('/');
+  });
+
+  beforeEach(() => {
+    (cy as any).restoreLocalStorage();
+  });
+
+  afterEach(() => {
+    (cy as any).saveLocalStorage();
   });
 
   after(() => {
@@ -19,7 +27,7 @@ context('Full round trip', () => {
     cy.get('[type="submit"]').click();
 
     (cy as any).eyesCheckWindow(
-      'shows a message when the credentials are wrong'
+      'show a message when the credentials are wrong'
     );
     cy.contains('Invalid username or password').should('be.visible');
   });
