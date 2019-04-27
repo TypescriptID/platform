@@ -1,3 +1,4 @@
+import * as ngCore from '@angular/core';
 import { on, createReducer, createAction, props, union } from '@ngrx/store';
 import { expecter } from 'ts-snippet';
 
@@ -49,12 +50,10 @@ import {on} from './modules/store/src/reducer_creator';
           bar?: number;
         }
 
-        const fooBarReducer = createReducer<State>(
-          [
-            on(foo, (state, { foo }) => ({ ...state, foo })),
-            on(bar, (state, { bar }) => ({ ...state, bar })),
-          ],
-          {}
+        const fooBarReducer = createReducer(
+          {} as State,
+          on(foo, (state, { foo }) => ({ ...state, foo })),
+          on(bar, (state, { bar }) => ({ ...state, bar }))
         );
 
         expect(typeof fooBarReducer).toEqual('function');
@@ -72,9 +71,9 @@ import {on} from './modules/store/src/reducer_creator';
       it('should support reducers with multiple actions', () => {
         type State = string[];
 
-        const fooBarReducer = createReducer<State>(
-          [on(foo, bar, (state, { type }) => [...state, type])],
-          []
+        const fooBarReducer = createReducer(
+          [] as State,
+          on(foo, bar, (state, { type }) => [...state, type])
         );
 
         expect(typeof fooBarReducer).toEqual('function');
@@ -87,6 +86,59 @@ import {on} from './modules/store/src/reducer_creator';
 
         state = fooBarReducer(state, bar({ bar: 54 }));
         expect(state).toEqual(['[foobar] FOO', '[foobar] BAR']);
+      });
+
+      describe('warning message when the same action type gets registered', () => {
+        it('should not warn when not violated', () => {
+          const spy = spyOn(console, 'warn');
+
+          const fooBarReducer = createReducer(
+            [],
+            on(foo, state => state),
+            on(bar, state => state)
+          );
+
+          expect(spy).not.toHaveBeenCalled();
+        });
+
+        it('should warn in dev mode', () => {
+          const spy = spyOn(console, 'warn');
+
+          const fooBarReducer = createReducer(
+            [],
+            on(foo, state => state),
+            on(bar, state => state),
+            on(foo, state => state)
+          );
+
+          expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should warn in dev mode with multiple actions', () => {
+          const spy = spyOn(console, 'warn');
+
+          const fooBarReducer = createReducer(
+            [],
+            on(foo, foo, state => state),
+            on(bar, state => state)
+          );
+
+          expect(spy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not warn in prod mode', () => {
+          spyOn(ngCore, 'isDevMode').and.returnValue(false);
+          const spy = spyOn(console, 'warn');
+
+          const fooBarReducer = createReducer(
+            [],
+            on(foo, state => state),
+            on(bar, state => state),
+            on(foo, state => state)
+          );
+
+          expect(spy).not.toHaveBeenCalled();
+        });
       });
     });
   });
