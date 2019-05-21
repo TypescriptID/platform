@@ -6,16 +6,16 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { StoreModule } from '@ngrx/store';
 import { EffectsModule } from '@ngrx/effects';
-import { StoreRouterConnectingModule } from '@ngrx/router-store';
+import { StoreRouterConnectingModule, RouterState } from '@ngrx/router-store';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 
-import { CoreModule } from '@example-app/core/core.module';
 import { AuthModule } from '@example-app/auth';
 
 import { ROOT_REDUCERS, metaReducers } from '@example-app/reducers';
 
-import { AppComponent } from '@example-app/core/containers/app.component';
+import { CoreModule } from '@example-app/core';
 import { AppRoutingModule } from '@example-app/app-routing.module';
+import { AppComponent } from '@example-app/core/containers';
 
 @NgModule({
   imports: [
@@ -37,13 +37,17 @@ import { AppRoutingModule } from '@example-app/app-routing.module';
       metaReducers,
       runtimeChecks: {
         strictImmutability: true,
+        strictStateSerializability: true,
+        strictActionSerializability: true,
       },
     }),
 
     /**
      * @ngrx/router-store keeps router state up-to-date in the store.
      */
-    StoreRouterConnectingModule.forRoot(),
+    StoreRouterConnectingModule.forRoot({
+      routerState: RouterState.Minimal,
+    }),
 
     /**
      * Store devtools instrument the store retaining past versions of state
@@ -70,7 +74,6 @@ import { AppRoutingModule } from '@example-app/app-routing.module';
      * See: https://ngrx.io/guide/effects#registering-root-effects
      */
     EffectsModule.forRoot([]),
-
     CoreModule,
   ],
   bootstrap: [AppComponent],
