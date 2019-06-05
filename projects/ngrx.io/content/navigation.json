@@ -220,6 +220,15 @@
         {
           "title": "Entity Adapter",
           "url": "guide/entity/adapter"
+        },
+        {
+          "title": "Recipes",
+          "children": [
+            {
+              "title": "Additional State Properties",
+              "url": "guide/entity/recipes/additional-state-properties"
+            }
+          ]
         }
       ]
     },
@@ -378,6 +387,11 @@
       "url": "api",
       "title": "API",
       "tooltip": "API Reference"
+    },
+    {
+      "url": "contributing",
+      "title": "Contributing",
+      "tooltip": "Contributing"
     }
   ],
   "Footer": [
@@ -435,7 +449,7 @@
           "tooltip": "GitHub"
         },
         {
-          "url": "https://github.com/ngrx/platform/tree/master/CONTRIBUTING.md",
+          "url": "contributing",
           "title": "Contribute",
           "tooltip": "Contribute to NgRx"
         }
