@@ -2,7 +2,6 @@ import {
   SchematicTestRunner,
   UnitTestTree,
 } from '@angular-devkit/schematics/testing';
-import { getFileContent } from '@schematics/angular/utility/test';
 import * as path from 'path';
 import { Schema as RootStoreOptions } from './schema';
 import {
@@ -19,6 +18,7 @@ describe('Store ng-add Schematic', () => {
     skipPackageJson: false,
     project: 'bar',
     module: 'app',
+    minimal: false,
   };
 
   const projectPath = getTestProjectPath();
@@ -129,16 +129,5 @@ describe('Store ng-add Schematic', () => {
     );
 
     expect(content).toMatch(/export interface AppState {/);
-  });
-
-  it('should add runtime checks by default', () => {
-    const options = { ...defaultOptions, module: 'app.module.ts' };
-
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
-    const content = tree.readContent(`${projectPath}/src/app/app.module.ts`);
-
-    expect(content).toMatch(/runtimeChecks: {/);
-    expect(content).toMatch(/strictStateImmutability: true,/);
-    expect(content).toMatch(/strictActionImmutability: true/);
   });
 });

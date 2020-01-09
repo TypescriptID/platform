@@ -5,7 +5,6 @@
     "stripInternal": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
     "module": "es2015",
     "moduleResolution": "node",
     "noEmitOnError": false,
@@ -31,6 +30,7 @@
     // Work around for issue: https://github.com/angular/angular/issues/22210
     "strictMetadataEmit": false,
     "flatModuleOutFile": "index.js",
-    "flatModuleId": "@ngrx/data"
+    "flatModuleId": "@ngrx/data",
+    "enableIvy": false
   }
 }

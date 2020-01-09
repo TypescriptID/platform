@@ -6,7 +6,6 @@
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "strictPropertyInitialization": false,
     "downlevelIteration": true,
     "noStrictGenericChecks": true,
     "lib": ["es2016", "dom"],
@@ -17,6 +16,7 @@
     "rootDir": "./",
     "strict": true,
     "paths": {
+      "@ngrx/component": ["./modules/component"],
       "@ngrx/data": ["./modules/data"],
       "@ngrx/data/schematics-core": ["./modules/data/schematics-core"],
       "@ngrx/effects": ["./modules/effects"],
