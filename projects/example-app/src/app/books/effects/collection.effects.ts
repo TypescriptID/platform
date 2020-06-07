@@ -31,13 +31,13 @@ export class CollectionEffects {
 
   loadCollection$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(CollectionPageActions.loadCollection),
+      ofType(CollectionPageActions.enter),
       switchMap(() =>
         this.storageService.getCollection().pipe(
           map((books: Book[]) =>
             CollectionApiActions.loadBooksSuccess({ books })
           ),
-          catchError(error =>
+          catchError((error) =>
             of(CollectionApiActions.loadBooksFailure({ error }))
           )
         )

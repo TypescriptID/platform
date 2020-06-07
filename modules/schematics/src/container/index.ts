@@ -29,7 +29,7 @@ import {
 } from '@ngrx/schematics/schematics-core';
 import { Schema as ContainerOptions } from './schema';
 
-function addStateToComponent(options: ContainerOptions) {
+function addStateToComponent(options: Partial<ContainerOptions>) {
   return (host: Tree) => {
     if (!options.state && !options.stateInterface) {
       return host;
@@ -90,13 +90,9 @@ function addStateToComponent(options: ContainerOptions) {
     );
     const cmpCtr = componentConstructor as ts.ConstructorDeclaration;
     const { pos } = cmpCtr;
-    const stateType = options.state
-      ? `fromStore.${options.stateInterface}`
-      : 'any';
     const constructorText = cmpCtr.getText();
     const [start, end] = constructorText.split('()');
-    const storeText = `private store: Store<${stateType}>`;
-    const storeConstructor = [start, `(${storeText})`, end].join('');
+    const storeConstructor = [start, `(private store: Store)`, end].join('');
     const constructorUpdate = new ReplaceChange(
       componentPath,
       pos,
@@ -126,6 +122,10 @@ export default function(options: ContainerOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     options.path = getProjectPath(host, options);
 
+    if (!options.skipTests && options.skipTest) {
+      options.skipTests = options.skipTest;
+    }
+
     const parsedPath = parseName(options.path, options.name);
     options.name = parsedPath.name;
     options.path = parsedPath.path;
@@ -140,7 +140,7 @@ export default function(options: ContainerOptions): Rule {
     const templateSource = apply(
       url(options.testDepth === 'unit' ? './files' : './integration-files'),
       [
-        options.skipTest
+        options.skipTests
           ? filter(path => !path.endsWith('.spec.ts.template'))
           : noop(),
         applyTemplates({
@@ -152,10 +152,15 @@ export default function(options: ContainerOptions): Rule {
       ]
     );
 
+    // Remove all undefined values to use the schematic defaults (in angular.json or the Angular schema)
+    (Object.keys(opts) as (keyof ContainerOptions)[]).forEach(
+      key => (opts[key] === undefined ? delete opts[key] : {})
+    );
+
     return chain([
       externalSchematic('@schematics/angular', 'component', {
         ...opts,
-        skipTests: true
+        skipTests: true,
       }),
       addStateToComponent(options),
       mergeWith(templateSource),

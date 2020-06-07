@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "../../",
     "declaration": true,
     "stripInternal": true,
     "emitDecoratorMetadata": true,
@@ -11,16 +11,12 @@
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "downlevelIteration": true,
-    "outDir": "../../dist/packages/data",
-    "paths": {
-      "@ngrx/store": ["../../dist/packages/store"],
-      "@ngrx/effects": ["../../dist/packages/effects"],
-      "@ngrx/entity": ["../../dist/packages/entity"]
-    },
+    "outDir": "../../dist/modules/data",
+    "paths": {},
     "rootDir": ".",
     "sourceMap": true,
     "inlineSources": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["es2018", "dom"],
     "target": "es2015",
     "skipLibCheck": true
   },

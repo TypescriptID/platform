@@ -62,8 +62,8 @@ describe('ngRx Integration spec', () => {
         imports: [StoreModule.forRoot(reducers, { initialState })],
       });
 
-      store = TestBed.get(Store);
-      state = TestBed.get(State);
+      store = TestBed.inject(Store);
+      state = TestBed.inject(State);
     });
 
     it('should successfully instantiate', () => {
@@ -72,7 +72,7 @@ describe('ngRx Integration spec', () => {
 
     it('should combine reducers automatically if a key/value map is provided', () => {
       const action = { type: 'Test Action' };
-      const reducer$: ReducerManager = TestBed.get(ReducerManager);
+      const reducer$ = TestBed.inject(ReducerManager);
 
       reducer$.pipe(first()).subscribe((reducer: ActionReducer<any, any>) => {
         expect(reducer).toBeDefined();
@@ -85,7 +85,7 @@ describe('ngRx Integration spec', () => {
     });
 
     it('should use a provided initial state', () => {
-      const resolvedInitialState = TestBed.get(INITIAL_STATE);
+      const resolvedInitialState = TestBed.inject(INITIAL_STATE);
 
       expect(resolvedInitialState).toEqual(initialState);
     });
@@ -185,7 +185,7 @@ describe('ngRx Integration spec', () => {
         expect(currentlyVisibleTodos.length).toBe(0);
       });
 
-      it('should use props to get a todo', (done: DoneFn) => {
+      it('should use props to get a todo', (done: any) => {
         const getTodosById = createSelector(
           (state: TodoAppSchema) => state.todos,
           (todos: Todo[], id: number) => {
@@ -194,27 +194,22 @@ describe('ngRx Integration spec', () => {
         );
 
         const todo$ = store.select(getTodosById, 2);
-        todo$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .subscribe(res => {
-            expect(res).toEqual([
-              undefined,
-              {
-                id: 2,
-                text: 'second todo',
-                completed: false,
-              },
-              {
-                id: 2,
-                text: 'second todo',
-                completed: true,
-              },
-            ]);
-            done();
-          });
+        todo$.pipe(take(3), toArray()).subscribe(res => {
+          expect(res).toEqual([
+            undefined,
+            {
+              id: 2,
+              text: 'second todo',
+              completed: false,
+            },
+            {
+              id: 2,
+              text: 'second todo',
+              completed: true,
+            },
+          ]);
+          done();
+        });
 
         store.dispatch({ type: ADD_TODO, payload: { text: 'first todo' } });
         store.dispatch({ type: ADD_TODO, payload: { text: 'second todo' } });
@@ -224,7 +219,7 @@ describe('ngRx Integration spec', () => {
         });
       });
 
-      it('should use the selector and props to get a todo', (done: DoneFn) => {
+      it('should use the selector and props to get a todo', (done: any) => {
         const getTodosState = createFeatureSelector<TodoAppSchema, Todo[]>(
           'todos'
         );
@@ -236,19 +231,14 @@ describe('ngRx Integration spec', () => {
         );
 
         const todo$ = store.select(getTodosById, 2);
-        todo$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .subscribe(res => {
-            expect(res).toEqual([
-              undefined,
-              { id: 2, text: 'second todo', completed: false },
-              { id: 2, text: 'second todo', completed: true },
-            ]);
-            done();
-          });
+        todo$.pipe(take(3), toArray()).subscribe(res => {
+          expect(res).toEqual([
+            undefined,
+            { id: 2, text: 'second todo', completed: false },
+            { id: 2, text: 'second todo', completed: true },
+          ]);
+          done();
+        });
 
         store.dispatch({ type: ADD_TODO, payload: { text: 'first todo' } });
         store.dispatch({ type: ADD_TODO, payload: { text: 'second todo' } });
@@ -322,7 +312,7 @@ describe('ngRx Integration spec', () => {
         expect(currentlyVisibleTodos.length).toBe(0);
       });
 
-      it('should use the selector and props to get a todo', (done: DoneFn) => {
+      it('should use the selector and props to get a todo', (done: any) => {
         const getTodosState = createFeatureSelector<TodoAppSchema, Todo[]>(
           'todos'
         );
@@ -334,19 +324,14 @@ describe('ngRx Integration spec', () => {
         );
 
         const todo$ = store.pipe(select(getTodosById, 2));
-        todo$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .subscribe(res => {
-            expect(res).toEqual([
-              undefined,
-              { id: 2, text: 'second todo', completed: false },
-              { id: 2, text: 'second todo', completed: true },
-            ]);
-            done();
-          });
+        todo$.pipe(take(3), toArray()).subscribe(res => {
+          expect(res).toEqual([
+            undefined,
+            { id: 2, text: 'second todo', completed: false },
+            { id: 2, text: 'second todo', completed: true },
+          ]);
+          done();
+        });
 
         store.dispatch({ type: ADD_TODO, payload: { text: 'first todo' } });
         store.dispatch({ type: ADD_TODO, payload: { text: 'second todo' } });
@@ -356,7 +341,7 @@ describe('ngRx Integration spec', () => {
         });
       });
 
-      it('should use the props in the projector to get a todo', (done: DoneFn) => {
+      it('should use the props in the projector to get a todo', (done: any) => {
         const getTodosState = createFeatureSelector<TodoAppSchema, Todo[]>(
           'todos'
         );
@@ -368,27 +353,22 @@ describe('ngRx Integration spec', () => {
         );
 
         const todo$ = store.pipe(select(getTodosById, { id: 2 }));
-        todo$
-          .pipe(
-            take(3),
-            toArray()
-          )
-          .subscribe(res => {
-            expect(res).toEqual([
-              undefined,
-              {
-                id: 2,
-                text: 'second todo',
-                completed: false,
-              },
-              {
-                id: 2,
-                text: 'second todo',
-                completed: true,
-              },
-            ]);
-            done();
-          });
+        todo$.pipe(take(3), toArray()).subscribe(res => {
+          expect(res).toEqual([
+            undefined,
+            {
+              id: 2,
+              text: 'second todo',
+              completed: false,
+            },
+            {
+              id: 2,
+              text: 'second todo',
+              completed: true,
+            },
+          ]);
+          done();
+        });
 
         store.dispatch({ type: ADD_TODO, payload: { text: 'first todo' } });
         store.dispatch({ type: ADD_TODO, payload: { text: 'second todo' } });
@@ -429,7 +409,7 @@ describe('ngRx Integration spec', () => {
         ],
       });
 
-      const store: Store<any> = TestBed.get(Store);
+      const store = TestBed.inject(Store);
 
       let expected = [
         {
@@ -464,7 +444,7 @@ describe('ngRx Integration spec', () => {
         ],
       });
 
-      const store: Store<any> = TestBed.get(Store);
+      const store = TestBed.inject(Store);
 
       const expected = {
         todos: {
@@ -479,7 +459,7 @@ describe('ngRx Integration spec', () => {
       });
     });
 
-    it('throws if forRoot() is used more than once', (done: DoneFn) => {
+    it('throws if forRoot() is used more than once', (done: any) => {
       @NgModule({
         imports: [StoreModule.forRoot({})],
       })
@@ -489,10 +469,10 @@ describe('ngRx Integration spec', () => {
         imports: [StoreModule.forRoot({}), RouterTestingModule.withRoutes([])],
       });
 
-      let router: Router = TestBed.get(Router);
-      const loader: SpyNgModuleFactoryLoader = TestBed.get(
+      let router = TestBed.inject(Router);
+      const loader: SpyNgModuleFactoryLoader = TestBed.inject(
         NgModuleFactoryLoader
-      );
+      ) as SpyNgModuleFactoryLoader;
 
       loader.stubbedModules = { feature: FeatureModule };
       router.resetConfig([{ path: 'feature-path', loadChildren: 'feature' }]);

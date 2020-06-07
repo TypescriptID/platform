@@ -43,16 +43,16 @@ describe('CollectionEffects', () => {
           useValue: {
             removeItem: jest.fn(),
             setItem: jest.fn(),
-            getItem: jest.fn(_ => JSON.stringify([])),
+            getItem: jest.fn((_) => JSON.stringify([])),
           },
         },
         provideMockActions(() => actions$),
       ],
     });
 
-    db = TestBed.get(BookStorageService);
-    effects = TestBed.get(CollectionEffects);
-    actions$ = TestBed.get(Actions);
+    db = TestBed.inject(BookStorageService);
+    effects = TestBed.inject(CollectionEffects);
+    actions$ = TestBed.inject(Actions);
   });
   describe('checkStorageSupport$', () => {
     it('should call db.checkStorageSupport when initially subscribed to', () => {
@@ -62,7 +62,7 @@ describe('CollectionEffects', () => {
   });
   describe('loadCollection$', () => {
     it('should return a collection.LoadSuccess, with the books, on success', () => {
-      const action = CollectionPageActions.loadCollection();
+      const action = CollectionPageActions.enter();
       const completion = CollectionApiActions.loadBooksSuccess({
         books: [book1, book2],
       });
@@ -76,7 +76,7 @@ describe('CollectionEffects', () => {
     });
 
     it('should return a collection.LoadFail, if the query throws', () => {
-      const action = CollectionPageActions.loadCollection();
+      const action = CollectionPageActions.enter();
       const error = 'Error!';
       const completion = CollectionApiActions.loadBooksFailure({ error });
 

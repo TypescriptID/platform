@@ -188,7 +188,7 @@ export function commandDispatchTest(
       } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_ALL);
       expect(entityName).toBe('Hero');
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(mergeStrategy).toBeUndefined();
     });
 
     it('#getAll({mergeStrategy}) dispatches QUERY_ALL with a MergeStrategy', () => {
@@ -210,7 +210,7 @@ export function commandDispatchTest(
       const { entityOp, data, mergeStrategy } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_BY_KEY);
       expect(data).toBe(42);
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(mergeStrategy).toBeUndefined();
     });
 
     it('#getByKey(42, {mergeStrategy}) dispatches QUERY_BY_KEY with a MergeStrategy', () => {
@@ -235,8 +235,8 @@ export function commandDispatchTest(
       } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_MANY);
       expect(entityName).toBe('Hero');
-      expect(data).toEqual({ name: 'B' }, 'params');
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(data).toEqual({ name: 'B' });
+      expect(mergeStrategy).toBeUndefined();
     });
 
     it('#getWithQuery(string) dispatches QUERY_MANY', () => {
@@ -250,8 +250,8 @@ export function commandDispatchTest(
       } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_MANY);
       expect(entityName).toBe('Hero');
-      expect(data).toEqual('name=B', 'params');
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(data).toEqual('name=B');
+      expect(mergeStrategy).toBeUndefined();
     });
 
     it('#getWithQuery(string) dispatches QUERY_MANY with a MergeStrategy', () => {
@@ -267,7 +267,7 @@ export function commandDispatchTest(
       } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_MANY);
       expect(entityName).toBe('Hero');
-      expect(data).toEqual('name=B', 'params');
+      expect(data).toEqual('name=B');
       expect(mergeStrategy).toBe(MergeStrategy.PreserveChanges);
     });
 
@@ -281,7 +281,7 @@ export function commandDispatchTest(
       } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.QUERY_LOAD);
       expect(entityName).toBe('Hero');
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(mergeStrategy).toBeUndefined();
     });
   });
 
@@ -304,7 +304,7 @@ export function commandDispatchTest(
       const { entityOp, data, mergeStrategy } = dispatchedAction().payload;
       expect(entityOp).toBe(EntityOp.ADD_ONE);
       expect(data).toBe(hero);
-      expect(mergeStrategy).toBeUndefined('no MergeStrategy');
+      expect(mergeStrategy).toBeUndefined();
     });
 
     it('#addOneToCache can dispatch ADD_ONE and MergeStrategy.IgnoreChanges', () => {

@@ -58,7 +58,7 @@ describe('EntityCollectionService', () => {
     });
 
     // Compare to next test which subscribes to getAll() result
-    it('can use loading$ to learn when getAll() succeeds', (done: DoneFn) => {
+    it('can use loading$ to learn when getAll() succeeds', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -78,7 +78,7 @@ describe('EntityCollectionService', () => {
     });
 
     // Compare to previous test the waits for loading$ flag to flip
-    it('getAll observable should emit heroes on success', (done: DoneFn) => {
+    it('getAll observable should emit heroes on success', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -88,20 +88,20 @@ describe('EntityCollectionService', () => {
       // reducedActions$Snoop(); // diagnostic
     });
 
-    it('getAll observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('getAll observable should emit expected error when data service fails', (done: any) => {
       const httpError = { error: new Error('Test Failure'), status: 501 };
       const error = makeDataServiceError('GET', httpError);
       dataService.setErrorResponse('getAll', error);
       heroCollectionService.getAll().subscribe(expectErrorToBe(error, done));
     });
 
-    it('getByKey observable should emit a hero on success', (done: DoneFn) => {
+    it('getByKey observable should emit a hero on success', (done: any) => {
       const hero = { id: 1, name: 'A' } as Hero;
       dataService.setResponse('getById', hero);
       heroCollectionService.getByKey(1).subscribe(expectDataToBe(hero, done));
     });
 
-    it('getByKey observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('getByKey observable should emit expected error when data service fails', (done: any) => {
       // Simulate HTTP 'Not Found' response
       const httpError = new HttpErrorResponse({
         error: 'Entity not found',
@@ -120,7 +120,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectErrorToBe(error, done));
     });
 
-    it('getWithQuery observable should emit heroes on success', (done: DoneFn) => {
+    it('getWithQuery observable should emit heroes on success', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -132,7 +132,7 @@ describe('EntityCollectionService', () => {
       // reducedActions$Snoop(); // diagnostic
     });
 
-    it('getWithQuery observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('getWithQuery observable should emit expected error when data service fails', (done: any) => {
       const httpError = { error: new Error('Test Failure'), status: 501 };
       const error = makeDataServiceError('GET', httpError);
       dataService.setErrorResponse('getWithQuery', error);
@@ -141,7 +141,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectErrorToBe(error, done));
     });
 
-    it('load observable should emit heroes on success', (done: DoneFn) => {
+    it('load observable should emit heroes on success', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -149,7 +149,7 @@ describe('EntityCollectionService', () => {
       heroCollectionService.load().subscribe(expectDataToBe(heroes, done));
     });
 
-    it('load observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('load observable should emit expected error when data service fails', (done: any) => {
       const httpError = { error: new Error('Test Failure'), status: 501 };
       const error = makeDataServiceError('GET', httpError);
       dataService.setErrorResponse('getAll', error);
@@ -174,7 +174,7 @@ describe('EntityCollectionService', () => {
       } = entityServicesSetup());
     });
 
-    it('can cancel a long running query', (done: DoneFn) => {
+    it('can cancel a long running query', (done: any) => {
       const responseDelay = 4;
       dataService['getAll'].and.returnValue(
         of(heroes).pipe(delay(responseDelay))
@@ -186,10 +186,7 @@ describe('EntityCollectionService', () => {
       heroCollectionService.getAll(options).subscribe(
         data => fail('should not have data but got data'),
         error => {
-          expect(error instanceof PersistanceCanceled).toBe(
-            true,
-            'is PersistanceCanceled'
-          );
+          expect(error instanceof PersistanceCanceled).toBe(true);
           expect(error.message).toBe('Test cancel');
           done();
         }
@@ -198,7 +195,7 @@ describe('EntityCollectionService', () => {
       heroCollectionService.cancel(correlationId, 'Test cancel');
     });
 
-    it('has no effect on action with different correlationId', (done: DoneFn) => {
+    it('has no effect on action with different correlationId', (done: any) => {
       const responseDelay = 4;
       dataService['getAll'].and.returnValue(
         of(heroes).pipe(delay(responseDelay))
@@ -214,7 +211,7 @@ describe('EntityCollectionService', () => {
       heroCollectionService.cancel('not-the-crid');
     });
 
-    it('has no effect when too late', (done: DoneFn) => {
+    it('has no effect when too late', (done: any) => {
       const responseDelay = 4;
       dataService['getAll'].and.returnValue(
         of(heroes).pipe(delay(responseDelay))
@@ -284,7 +281,7 @@ describe('EntityCollectionService', () => {
       } = entityServicesSetup());
     });
 
-    it('add() should save a new entity and return it', (done: DoneFn) => {
+    it('add() should save a new entity and return it', (done: any) => {
       const extra = expectOptimisticSuccess(isOptimistic);
       const hero = { id: 1, name: 'A' } as Hero;
       dataService.setResponse('add', hero);
@@ -293,7 +290,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectDataToBe(hero, done, undefined, extra));
     });
 
-    it('add() observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('add() observable should emit expected error when data service fails', (done: any) => {
       const hero = { id: 1, name: 'A' } as Hero;
       const httpError = { error: new Error('Test Failure'), status: 501 };
       const error = makeDataServiceError('PUT', httpError);
@@ -301,7 +298,7 @@ describe('EntityCollectionService', () => {
       heroCollectionService.add(hero).subscribe(expectErrorToBe(error, done));
     });
 
-    it('delete() should send delete for entity not in cache and return its id', (done: DoneFn) => {
+    it('delete() should send delete for entity not in cache and return its id', (done: any) => {
       const extra = expectOptimisticSuccess(isOptimistic);
       dataService.setResponse('delete', 42);
       heroCollectionService
@@ -309,14 +306,13 @@ describe('EntityCollectionService', () => {
         .subscribe(expectDataToBe(42, done, undefined, extra));
     });
 
-    it('delete() should skip delete for added entity cache', (done: DoneFn) => {
+    it('delete() should skip delete for added entity cache', (done: any) => {
       // reducedActions$Snoop();
       let wasSkipped: boolean;
       successActions$.subscribe(
         (act: EntityAction) => (wasSkipped = act.payload.skip === true)
       );
-      const extra = () =>
-        expect(wasSkipped).toBe(true, 'expected to be skipped');
+      const extra = () => expect(wasSkipped).toBe(true);
 
       const hero = { id: 1, name: 'A' } as Hero;
       heroCollectionService.addOneToCache(hero);
@@ -326,14 +322,14 @@ describe('EntityCollectionService', () => {
         .subscribe(expectDataToBe(1, done, undefined, extra));
     });
 
-    it('delete() observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('delete() observable should emit expected error when data service fails', (done: any) => {
       const httpError = { error: new Error('Test Failure'), status: 501 };
       const error = makeDataServiceError('DELETE', httpError);
       dataService.setErrorResponse('delete', error);
       heroCollectionService.delete(42).subscribe(expectErrorToBe(error, done));
     });
 
-    it('update() should save updated entity and return it', (done: DoneFn) => {
+    it('update() should save updated entity and return it', (done: any) => {
       const extra = expectOptimisticSuccess(isOptimistic);
       const preUpdate = { id: 1, name: 'A' } as Hero;
       heroCollectionService.addAllToCache([preUpdate]); // populate cache
@@ -344,7 +340,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectDataToBe(update, done, undefined, extra));
     });
 
-    it('update() should save updated entity and return server-changed version', (done: DoneFn) => {
+    it('update() should save updated entity and return server-changed version', (done: any) => {
       const extra = expectOptimisticSuccess(isOptimistic);
       const preUpdate = { id: 1, name: 'A' } as Hero;
       heroCollectionService.addAllToCache([preUpdate]); // populate cache
@@ -360,7 +356,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectDataToBe(postUpdate, done, undefined, extra));
     });
 
-    it('update() observable should emit expected error when data service fails', (done: DoneFn) => {
+    it('update() observable should emit expected error when data service fails', (done: any) => {
       const preUpdate = { id: 1, name: 'A' } as Hero;
       heroCollectionService.addAllToCache([preUpdate]); // populate cache
       const update = { ...preUpdate, name: 'Updated A' };
@@ -372,7 +368,7 @@ describe('EntityCollectionService', () => {
         .subscribe(expectErrorToBe(error, done));
     });
 
-    it('can handle out-of-order save results', (done: DoneFn) => {
+    it('can handle out-of-order save results', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       let successActionCount = 0;
@@ -384,7 +380,7 @@ describe('EntityCollectionService', () => {
         successActionCount += 1;
         if (successActionCount === 2) {
           // Confirm hero2 actually saved before hero1
-          expect(savedHeroes).toEqual([hero2, hero1], 'savedHeroes');
+          expect(savedHeroes).toEqual([hero2, hero1]);
           done();
         }
       });
@@ -404,11 +400,11 @@ describe('EntityCollectionService', () => {
       // Confirm that each add returns with its own hero
       heroCollectionService
         .add(hero1)
-        .subscribe(data => expect(data).toEqual(hero1, 'first hero'));
+        .subscribe(data => expect(data).toEqual(hero1));
 
       heroCollectionService
         .add(hero2)
-        .subscribe(data => expect(data).toEqual(hero2, 'second hero'));
+        .subscribe(data => expect(data).toEqual(hero2));
     });
   }
 
@@ -456,7 +452,11 @@ const entityMetadata: EntityMetadataMap = {
 };
 
 function entityServicesSetup() {
-  const logger = jasmine.createSpyObj('Logger', ['error', 'log', 'warn']);
+  const logger = {
+    error: jasmine.createSpy('error'),
+    log: jasmine.createSpy('log'),
+    warn: jasmine.createSpy('warn'),
+  };
 
   TestBed.configureTestingModule({
     imports: [
@@ -474,21 +474,23 @@ function entityServicesSetup() {
     ],
   });
 
-  const actions$: Observable<Action> = TestBed.get(Actions);
-  const dataService: TestDataService = TestBed.get(EntityDataService);
-  const entityActionFactory: EntityActionFactory = TestBed.get(
+  const actions$: Observable<Action> = TestBed.inject(Actions);
+  const dataService: TestDataService = TestBed.inject<unknown>(
+    EntityDataService
+  ) as TestDataService;
+  const entityActionFactory: EntityActionFactory = TestBed.inject(
     EntityActionFactory
   );
-  const entityDispatcherFactory: EntityDispatcherFactory = TestBed.get(
+  const entityDispatcherFactory: EntityDispatcherFactory = TestBed.inject(
     EntityDispatcherFactory
   );
-  const entityServices: EntityServices = TestBed.get(EntityServices);
+  const entityServices: EntityServices = TestBed.inject(EntityServices);
   const heroCollectionService = entityServices.getEntityCollectionService<Hero>(
     'Hero'
   );
   const reducedActions$: Observable<Action> =
     entityDispatcherFactory.reducedActions$;
-  const store: Store<EntityCache> = TestBed.get(Store);
+  const store: Store<EntityCache> = TestBed.inject(Store);
   const successActions$: Observable<EntityAction> = reducedActions$.pipe(
     filter(
       (act: any) => act.payload && act.payload.entityOp.endsWith(OP_SUCCESS)
@@ -502,7 +504,7 @@ function entityServicesSetup() {
     successActions$.subscribe(
       (act: EntityAction) => (wasOptimistic = act.payload.isOptimistic === true)
     );
-    return () => expect(wasOptimistic).toBe(expected, msg);
+    return () => expect(wasOptimistic).toBe(expected);
   }
 
   /** Snoop on reducedActions$ while debugging a test */
@@ -528,13 +530,13 @@ function entityServicesSetup() {
 
 function expectDataToBe(
   expected: any,
-  done: DoneFn,
+  done: any,
   message?: string,
   extra?: () => void
 ) {
   return {
     next: (data: any) => {
-      expect(data).toEqual(expected, message);
+      expect(data).toEqual(expected);
       if (extra) {
         extra(); // extra expectations before done
       }
@@ -544,14 +546,14 @@ function expectDataToBe(
   };
 }
 
-function expectErrorToBe(expected: any, done: DoneFn, message?: string) {
+function expectErrorToBe(expected: any, done: any, message?: string) {
   return {
     next: (data: any) => {
       fail(`Expected error response but got data: '${JSON.stringify(data)}'`);
       done();
     },
     error: (error: any) => {
-      expect(error).toEqual(expected, message);
+      expect(error).toEqual(expected);
       done();
     },
   };

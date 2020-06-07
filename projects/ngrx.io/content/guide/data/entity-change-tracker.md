@@ -20,7 +20,7 @@ Many apps are easier to build when saves are "optimistic" because
 the changes are immediately available to application code that is watching collection selectors.
 The app doesn't have to wait for confirmation that the entity operation succeeded on the server.
 
-A _pessimistic save_ doesn't update the store until the server until the server confirms that the save succeeded,
+A _pessimistic save_ doesn't update the store until the server confirms that the save succeeded,
 which NgRx Data then turns into a "SUCCESS" action that updates the collection.
 With a _pessimistic_ save, the changes won't be available in the store
 
@@ -301,8 +301,8 @@ Disabling change tracking with `IgnoreChanges` is the most frequent choice.
 
 ### Disable change tracking
 
-You can opt-out of change tracking for the entire collection by setting the collection's `enableChangeTracking` flag to `false` in its `entityMetadata`.
-When `false`, NgRx Data does not track any changes for this collection
+You can opt-out of change tracking for the entire collection by setting the collection's `noChangeTracking` flag to `true` in its `entityMetadata`.
+When `true`, NgRx Data does not track any changes for this collection
 and the `EntityCollection.changeState` property remains an empty object.
 
 You can opt-out of change tracking for a _specific_ entity action by supplying the  `mergeStrategy` in the optional `EntityActionOptions` that you can pass in the action payload.

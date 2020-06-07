@@ -49,8 +49,8 @@ describe('ngRx Store', () => {
       imports: [StoreModule.forRoot(reducers, { initialState, metaReducers })],
     });
 
-    store = TestBed.get(Store);
-    dispatcher = TestBed.get(ActionsSubject);
+    store = TestBed.inject(Store);
+    dispatcher = TestBed.inject(ActionsSubject);
   }
 
   describe('initial state', () => {
@@ -64,7 +64,7 @@ describe('ngRx Store', () => {
       testStoreValue({ counter1: 0, counter2: 5, counter3: 0 }, done);
     });
 
-    it('should keep initial state values when state is partially initialized', (done: DoneFn) => {
+    it('should keep initial state values when state is partially initialized', (done: any) => {
       TestBed.configureTestingModule({
         imports: [
           StoreModule.forRoot({} as any, {
@@ -135,8 +135,8 @@ describe('ngRx Store', () => {
     });
 
     function testInitialState(feature?: string) {
-      store = TestBed.get(Store);
-      dispatcher = TestBed.get(ActionsSubject);
+      store = TestBed.inject(Store);
+      dispatcher = TestBed.inject(ActionsSubject);
 
       const actionSequence = '--a--b--c--d--e--f--g';
       const stateSequence = 'i-w-----x-----y--z---';
@@ -163,8 +163,8 @@ describe('ngRx Store', () => {
       );
     }
 
-    function testStoreValue(expected: any, done: DoneFn) {
-      store = TestBed.get(Store);
+    function testStoreValue(expected: any, done: any) {
+      store = TestBed.inject(Store);
 
       store.pipe(take(1)).subscribe({
         next(val) {
@@ -308,8 +308,8 @@ describe('ngRx Store', () => {
 
     beforeEach(() => {
       setup();
-      const reducerManager = TestBed.get(ReducerManager);
-      const dispatcher = TestBed.get(ReducerManagerDispatcher);
+      const reducerManager = TestBed.inject(ReducerManager);
+      const dispatcher = TestBed.inject(ReducerManagerDispatcher);
       addReducerSpy = spyOn(reducerManager, 'addReducer').and.callThrough();
       removeReducerSpy = spyOn(
         reducerManager,
@@ -365,8 +365,8 @@ describe('ngRx Store', () => {
         imports: [StoreModule.forRoot({})],
       });
 
-      reducerManager = TestBed.get(ReducerManager);
-      const dispatcher = TestBed.get(ReducerManagerDispatcher);
+      reducerManager = TestBed.inject(ReducerManager);
+      const dispatcher = TestBed.inject(ReducerManagerDispatcher);
       reducerManagerDispatcherSpy = spyOn(dispatcher, 'next').and.callThrough();
     });
 
@@ -511,7 +511,7 @@ describe('ngRx Store', () => {
         ],
       });
 
-      const mockStore = TestBed.get(Store);
+      const mockStore = TestBed.inject(Store);
       const action = { type: INCREMENT };
 
       mockStore.dispatch(action);
@@ -520,7 +520,7 @@ describe('ngRx Store', () => {
       expect(metaReducerSpy2).toHaveBeenCalledWith(counterReducer2);
     });
 
-    it('should initial state with value', (done: DoneFn) => {
+    it('should initial state with value', (done: any) => {
       const counterInitialState = 2;
       TestBed.configureTestingModule({
         imports: [
@@ -536,7 +536,7 @@ describe('ngRx Store', () => {
         ],
       });
 
-      const mockStore = TestBed.get(Store);
+      const mockStore = TestBed.inject(Store);
 
       mockStore.pipe(take(1)).subscribe({
         next(val: any) {
@@ -557,7 +557,7 @@ describe('ngRx Store', () => {
       FEATURE_CONFIG2_TOKEN = new InjectionToken('Feature Config2');
     });
 
-    it('should initial state with value', (done: DoneFn) => {
+    it('should initial state with value', (done: any) => {
       const initialState = { counter1: 1 };
       const featureKey = 'counter';
 
@@ -578,7 +578,7 @@ describe('ngRx Store', () => {
         ],
       });
 
-      const mockStore = TestBed.get(Store);
+      const mockStore = TestBed.inject(Store);
 
       mockStore.pipe(take(1)).subscribe({
         next(val: any) {
@@ -589,7 +589,7 @@ describe('ngRx Store', () => {
       });
     });
 
-    it('should initial state with value for multi features', (done: DoneFn) => {
+    it('should initial state with value for multi features', (done: any) => {
       const initialState = 1;
       const initialState2 = 2;
       const initialState3 = 3;
@@ -626,7 +626,7 @@ describe('ngRx Store', () => {
         ],
       });
 
-      const mockStore = TestBed.get(Store);
+      const mockStore = TestBed.inject(Store);
 
       mockStore.pipe(take(1)).subscribe({
         next(val: any) {
@@ -694,7 +694,7 @@ describe('ngRx Store', () => {
           },
         ],
       });
-      const mockStore = TestBed.get(Store);
+      const mockStore = TestBed.inject(Store);
       const action = { type: INCREMENT };
       mockStore.dispatch(action);
 

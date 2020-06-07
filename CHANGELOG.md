@@ -1,3 +1,109 @@
+<a name="9.2.0"></a>
+
+# [9.2.0](https://github.com/ngrx/platform/compare/9.1.2...9.2.0) (2020-05-28)
+
+### Bug Fixes
+
+- **router-store:** selects should return selectors ([#2517](https://github.com/ngrx/platform/issues/2517)) ([831e1e4](https://github.com/ngrx/platform/commit/831e1e4)), closes [#2516](https://github.com/ngrx/platform/issues/2516)
+- **schematics:** components should inject the store without generic ([#2512](https://github.com/ngrx/platform/issues/2512)) ([4f7dcdc](https://github.com/ngrx/platform/commit/4f7dcdc))
+- **schematics:** use skipTests flag consistently, deprecate skipTest option ([#2522](https://github.com/ngrx/platform/issues/2522)) ([83033d7](https://github.com/ngrx/platform/commit/83033d7)), closes [#2521](https://github.com/ngrx/platform/issues/2521)
+- **store:** remove circular dependency for mock import ([#2540](https://github.com/ngrx/platform/issues/2540)) ([4892fa2](https://github.com/ngrx/platform/commit/4892fa2))
+
+### Features
+
+- **component:** add ngrxPush migration ([#2452](https://github.com/ngrx/platform/issues/2452)) ([0775093](https://github.com/ngrx/platform/commit/0775093)), closes [#2450](https://github.com/ngrx/platform/issues/2450)
+- **component-store:** add initial setup ([#2519](https://github.com/ngrx/platform/issues/2519)) ([a2657ac](https://github.com/ngrx/platform/commit/a2657ac))
+- **component-store:** initialization + updater/setState ([#2528](https://github.com/ngrx/platform/issues/2528)) ([3545df2](https://github.com/ngrx/platform/commit/3545df2))
+- **effects:** catch action creators being returned in effect without being called ([#2536](https://github.com/ngrx/platform/issues/2536)) ([100970b](https://github.com/ngrx/platform/commit/100970b))
+- **store:** add ngrxMockEnvironment function to control output during testing ([#2513](https://github.com/ngrx/platform/issues/2513)) ([da1a0c0](https://github.com/ngrx/platform/commit/da1a0c0)), closes [#2363](https://github.com/ngrx/platform/issues/2363)
+- **store:** add runtime check for action type uniqueness ([#2520](https://github.com/ngrx/platform/issues/2520)) ([2972980](https://github.com/ngrx/platform/commit/2972980))
+
+<a name="9.1.2"></a>
+
+## [9.1.2](https://github.com/ngrx/platform/compare/9.1.1...9.1.2) (2020-05-06)
+
+<a name="9.1.1"></a>
+
+## [9.1.1](https://github.com/ngrx/platform/compare/9.1.0...9.1.1) (2020-05-05)
+
+### Bug Fixes
+
+- **router-store:** selectors should return MemoizedSelector ([#2492](https://github.com/ngrx/platform/issues/2492)) ([39a4b91](https://github.com/ngrx/platform/commit/39a4b91))
+- **schematics:** use Angular default properties when not defined ([#2507](https://github.com/ngrx/platform/issues/2507)) ([7cd0624](https://github.com/ngrx/platform/commit/7cd0624)), closes [#1036](https://github.com/ngrx/platform/issues/1036)
+- **store:** ignore Ivy in runtime checks ([#2491](https://github.com/ngrx/platform/issues/2491)) ([46d752f](https://github.com/ngrx/platform/commit/46d752f)), closes [#2404](https://github.com/ngrx/platform/issues/2404)
+
+<a name="9.1.0"></a>
+
+# [9.1.0](https://github.com/ngrx/platform/compare/9.0.0...9.1.0) (2020-04-07)
+
+### Bug Fixes
+
+- **component:** add docs overview ([#2444](https://github.com/ngrx/platform/issues/2444)) ([a279dd1](https://github.com/ngrx/platform/commit/a279dd1)), closes [#2442](https://github.com/ngrx/platform/issues/2442)
+- **example:** optimistically add/remove book from collection ([#2429](https://github.com/ngrx/platform/issues/2429)) ([b0aacf7](https://github.com/ngrx/platform/commit/b0aacf7)), closes [#2417](https://github.com/ngrx/platform/issues/2417)
+- **schematics:** install v9 with ng-add ([#2455](https://github.com/ngrx/platform/issues/2455)) ([19f1bda](https://github.com/ngrx/platform/commit/19f1bda))
+- **toObservableValue:** accommodate all observable inputs ([#2471](https://github.com/ngrx/platform/issues/2471)) ([468303a](https://github.com/ngrx/platform/commit/468303a))
+
+### Features
+
+- **component:** add ngrxPush pipe and ngrxLet directive to [@ngrx](https://github.com/ngrx)/component package ([#2046](https://github.com/ngrx/platform/issues/2046)) ([464073d](https://github.com/ngrx/platform/commit/464073d))
+- **effects:** add user provided effects to EffectsModule.forFeature ([#2231](https://github.com/ngrx/platform/issues/2231)) ([59ce3e2](https://github.com/ngrx/platform/commit/59ce3e2)), closes [#2232](https://github.com/ngrx/platform/issues/2232)
+- **schematics:** export reducer directly when Ivy is enabled ([#2440](https://github.com/ngrx/platform/issues/2440)) ([b68fa67](https://github.com/ngrx/platform/commit/b68fa67))
+
+<a name="9.0.0"></a>
+
+# [9.0.0](https://github.com/ngrx/platform/compare/9.0.0-rc.0...9.0.0) (2020-03-09)
+
+### Features
+
+- **effects:** add EffectsRunner to public API ([#2427](https://github.com/ngrx/platform/issues/2427)) ([f66fd64](https://github.com/ngrx/platform/commit/f66fd64))
+
+<a name="9.0.0-rc.0"></a>
+
+# [9.0.0-rc.0](https://github.com/ngrx/platform/compare/9.0.0-beta.2...9.0.0-rc.0) (2020-03-02)
+
+### Bug Fixes
+
+- **data:** correct AppEntityServices example in ngrx data doc page ([#2413](https://github.com/ngrx/platform/issues/2413)) ([711ba0e](https://github.com/ngrx/platform/commit/711ba0e)), closes [#2280](https://github.com/ngrx/platform/issues/2280)
+- **example:** fix a typo selectShowSidenav ([#2414](https://github.com/ngrx/platform/issues/2414)) ([c9ebb06](https://github.com/ngrx/platform/commit/c9ebb06))
+
+### Features
+
+- **entity:** add 'setOne' method to entity adapter ([#2410](https://github.com/ngrx/platform/issues/2410)) ([4b4bb85](https://github.com/ngrx/platform/commit/4b4bb85)), closes [#2369](https://github.com/ngrx/platform/issues/2369)
+
+<a name="9.0.0-beta.2"></a>
+
+# [9.0.0-beta.2](https://github.com/ngrx/platform/compare/9.0.0-beta.1...9.0.0-beta.2) (2020-02-25)
+
+### Bug Fixes
+
+- **docs:** replace duplicate link ([#2399](https://github.com/ngrx/platform/issues/2399)) ([d4502b4](https://github.com/ngrx/platform/commit/d4502b4))
+- **effects:** use source instance for ngrxOnRunEffects to retain context ([#2401](https://github.com/ngrx/platform/issues/2401)) ([79c830c](https://github.com/ngrx/platform/commit/79c830c))
+
+### Features
+
+- **store-devtools:** add INITIAL_OPTIONS to public API ([#2405](https://github.com/ngrx/platform/issues/2405)) ([37f91db](https://github.com/ngrx/platform/commit/37f91db)), closes [#1470](https://github.com/ngrx/platform/issues/1470)
+
+<a name="9.0.0-beta.1"></a>
+
+# [9.0.0-beta.1](https://github.com/ngrx/platform/compare/9.0.0-beta.0...9.0.0-beta.1) (2020-02-18)
+
+### Bug Fixes
+
+- **data:** Angular 9 style ModuleWithProvider ([#2356](https://github.com/ngrx/platform/issues/2356)) ([#2357](https://github.com/ngrx/platform/issues/2357)) ([182f140](https://github.com/ngrx/platform/commit/182f140))
+- **data:** change type of filter observable ([#2349](https://github.com/ngrx/platform/issues/2349)) ([94f3ef1](https://github.com/ngrx/platform/commit/94f3ef1)), closes [#2337](https://github.com/ngrx/platform/issues/2337)
+- **data:** EntityDataModuleWithoutEffect ModuleWithProviders ([#2366](https://github.com/ngrx/platform/issues/2366)) ([234ce84](https://github.com/ngrx/platform/commit/234ce84))
+- **data:** make mergeServerUpserts change state immutably ([#2374](https://github.com/ngrx/platform/issues/2374)) ([#2389](https://github.com/ngrx/platform/issues/2389)) ([b3a49c1](https://github.com/ngrx/platform/commit/b3a49c1))
+- **data:** make undoMany remove tracking changes in changeState ([#2346](https://github.com/ngrx/platform/issues/2346)) ([#2352](https://github.com/ngrx/platform/issues/2352)) ([637b2c7](https://github.com/ngrx/platform/commit/637b2c7))
+- **data:** use ng_package for bundling instead of pkg_npm ([9a935b1](https://github.com/ngrx/platform/commit/9a935b1))
+- **effects:** dispatch OnInitEffects action after registration ([#2386](https://github.com/ngrx/platform/issues/2386)) ([daf1e64](https://github.com/ngrx/platform/commit/daf1e64)), closes [#2373](https://github.com/ngrx/platform/issues/2373)
+- **store:** provide the same instance of MockStore ([#2381](https://github.com/ngrx/platform/issues/2381)) ([827f336](https://github.com/ngrx/platform/commit/827f336)), closes [#2362](https://github.com/ngrx/platform/issues/2362)
+
+### Features
+
+- **effects:** limit retries to 10 by default ([#2376](https://github.com/ngrx/platform/issues/2376)) ([88124a7](https://github.com/ngrx/platform/commit/88124a7)), closes [#2303](https://github.com/ngrx/platform/issues/2303)
+- **store:** add strictActionWithinNgZone runtime check ([#2364](https://github.com/ngrx/platform/issues/2364)) ([4cae255](https://github.com/ngrx/platform/commit/4cae255)), closes [#2339](https://github.com/ngrx/platform/issues/2339)
+- **store:** testing - clean up mock store and remove static property ([#2361](https://github.com/ngrx/platform/issues/2361)) ([ee2c114](https://github.com/ngrx/platform/commit/ee2c114))
+
 <a name="9.0.0-beta.0"></a>
 
 # [9.0.0-beta.0](https://github.com/ngrx/platform/compare/8.6.0...9.0.0-beta.0) (2020-02-06)

@@ -22,6 +22,7 @@ import {
   addReducerToState,
   addReducerImportToNgModule,
   parseName,
+  isIvyEnabled,
 } from '@ngrx/schematics/schematics-core';
 import { Schema as ReducerOptions } from './schema';
 
@@ -31,6 +32,10 @@ export default function(options: ReducerOptions): Rule {
 
     if (options.module) {
       options.module = findModuleFromOptions(host, options);
+    }
+
+    if (!options.skipTests && options.skipTest) {
+      options.skipTests = options.skipTest;
     }
 
     const parsedPath = parseName(options.path, options.name);
@@ -44,11 +49,12 @@ export default function(options: ReducerOptions): Rule {
           options.flat ? '' : s,
           options.group ? 'reducers' : ''
         ),
+      isIvyEnabled: isIvyEnabled(host, 'tsconfig.json'),
       ...(options as object),
     };
 
     const commonTemplate = apply(url('./common-files'), [
-      options.skipTest
+      options.skipTests
         ? filter(path => !path.endsWith('.spec.ts.template'))
         : noop(),
       applyTemplates(templateOptions),

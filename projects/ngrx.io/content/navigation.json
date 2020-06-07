@@ -321,6 +321,27 @@
         {
           "title": "Overview",
           "url": "guide/component"
+        },
+        {
+          "title": "Installation",
+          "url": "guide/component/install"
+        },
+        {
+          "title": "Let Directive",
+          "url": "guide/component/let"
+        },
+        {
+          "title": "Push Pipe",
+          "url": "guide/component/push"
+        }
+      ]
+    },
+    {
+      "title": "@ngrx/component-store",
+      "children": [
+        {
+          "title": "Overview",
+          "url": "guide/component-store"
         }
       ]
     },
@@ -349,6 +370,10 @@
             {
               "title": "Reducer",
               "url": "guide/schematics/reducer"
+            },
+            {
+              "title": "Selector",
+              "url": "guide/schematics/selector"
             },
             {
               "title": "Container",
@@ -382,6 +407,10 @@
     {
       "title": "Migrations",
       "children": [
+        {
+          "title": "V9",
+          "url": "guide/migration/v9"
+        },
         {
           "title": "V8",
           "url": "guide/migration/v8"
@@ -476,6 +505,10 @@
     }
   ],
   "docVersions": [
+    {
+      "title": "v8",
+      "url": "https://v8.ngrx.io"
+    },
     {
       "title": "v7",
       "url": "https://v7.ngrx.io"

@@ -21,6 +21,7 @@ import {
   getProjectPath,
   findModuleFromOptions,
   parseName,
+  isIvyEnabled,
 } from '@ngrx/schematics/schematics-core';
 import { Schema as EntityOptions } from './schema';
 
@@ -31,6 +32,10 @@ export default function(options: EntityOptions): Rule {
     const parsedPath = parseName(options.path, options.name);
     options.name = parsedPath.name;
     options.path = parsedPath.path;
+
+    if (!options.skipTests && options.skipTest) {
+      options.skipTests = options.skipTest;
+    }
 
     if (options.module) {
       options.module = findModuleFromOptions(host, options);
@@ -45,11 +50,12 @@ export default function(options: EntityOptions): Rule {
         stringUtils.group(name, options.group ? 'models' : ''),
       'group-reducers': (s: string) =>
         stringUtils.group(s, options.group ? 'reducers' : ''),
+      isIvyEnabled: isIvyEnabled(host, 'tsconfig.json'),
       ...(options as object),
     };
 
     const commonTemplates = apply(url('./common-files'), [
-      options.skipTest
+      options.skipTests
         ? filter(path => !path.endsWith('.spec.ts.template'))
         : noop(),
       applyTemplates(templateOptions),

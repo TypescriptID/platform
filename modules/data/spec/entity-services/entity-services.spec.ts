@@ -78,18 +78,15 @@ describe('EntityServices', () => {
       );
       store.dispatch(heroAction);
 
-      expect(entityCacheValues.length).toEqual(
-        2,
-        'entityCache$ callback twice'
-      );
-      expect(entityCacheValues[0]).toEqual({}, 'empty at first');
-      expect(entityCacheValues[1].Hero).toBeDefined('has Hero collection');
+      expect(entityCacheValues.length).toEqual(2);
+      expect(entityCacheValues[0]).toEqual({});
+      expect(entityCacheValues[1].Hero).toBeDefined();
     });
   });
 
   describe('dispatch(MergeQuerySet)', () => {
     // using async test to guard against false test pass.
-    it('should update entityCache$ twice after merging two individual collections', (done: DoneFn) => {
+    it('should update entityCache$ twice after merging two individual collections', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -108,17 +105,11 @@ describe('EntityServices', () => {
       entityServices.entityCache$.subscribe(cache => {
         entityCacheValues.push(cache);
         if (entityCacheValues.length === 3) {
-          expect(entityCacheValues[0]).toEqual({}, '#1 empty at first');
-          expect(entityCacheValues[1]['Hero'].ids).toEqual(
-            [1, 2],
-            '#2 has heroes'
-          );
-          expect(entityCacheValues[1]['Villain']).toBeUndefined(
-            '#2 does not have Villain collection'
-          );
+          expect(entityCacheValues[0]).toEqual({});
+          expect(entityCacheValues[1]['Hero'].ids).toEqual([1, 2]);
+          expect(entityCacheValues[1]['Villain']).toBeUndefined();
           expect(entityCacheValues[2]['Villain'].entities['DE']).toEqual(
-            villain,
-            '#3 has villain'
+            villain
           );
           done();
         }
@@ -136,7 +127,7 @@ describe('EntityServices', () => {
     });
 
     // using async test to guard against false test pass.
-    it('should update entityCache$ once when MergeQuerySet multiple collections', (done: DoneFn) => {
+    it('should update entityCache$ once when MergeQuerySet multiple collections', (done: any) => {
       const hero1 = { id: 1, name: 'A' } as Hero;
       const hero2 = { id: 2, name: 'B' } as Hero;
       const heroes = [hero1, hero2];
@@ -150,19 +141,11 @@ describe('EntityServices', () => {
       const { entityServices } = entityServicesSetup();
 
       // Skip initial value. Want the first one after merge is dispatched
-      entityServices.entityCache$
-        .pipe(
-          skip(1),
-          first()
-        )
-        .subscribe(cache => {
-          expect(cache['Hero'].ids).toEqual([1, 2], 'has merged heroes');
-          expect(cache['Villain'].entities['DE']).toEqual(
-            villain,
-            'has merged villain'
-          );
-          done();
-        });
+      entityServices.entityCache$.pipe(skip(1), first()).subscribe(cache => {
+        expect(cache['Hero'].ids).toEqual([1, 2]);
+        expect(cache['Villain'].entities['DE']).toEqual(villain);
+        done();
+      });
       entityServices.dispatch(action);
     });
   });
@@ -185,7 +168,11 @@ const entityMetadata: EntityMetadataMap = {
 };
 
 function entityServicesSetup() {
-  const logger = jasmine.createSpyObj('Logger', ['error', 'log', 'warn']);
+  const logger = {
+    error: jasmine.createSpy('error'),
+    log: jasmine.createSpy('log'),
+    warn: jasmine.createSpy('warn'),
+  };
 
   TestBed.configureTestingModule({
     imports: [
@@ -203,15 +190,15 @@ function entityServicesSetup() {
     ],
   });
 
-  const actions$: Observable<Action> = TestBed.get(Actions);
-  const entityActionFactory: EntityActionFactory = TestBed.get(
+  const actions$: Observable<Action> = TestBed.inject(Actions);
+  const entityActionFactory: EntityActionFactory = TestBed.inject(
     EntityActionFactory
   );
-  const entityDispatcherFactory: EntityDispatcherFactory = TestBed.get(
+  const entityDispatcherFactory: EntityDispatcherFactory = TestBed.inject(
     EntityDispatcherFactory
   );
-  const entityServices: EntityServices = TestBed.get(EntityServices);
-  const store: Store<EntityCache> = TestBed.get(Store);
+  const entityServices: EntityServices = TestBed.inject(EntityServices);
+  const store: Store<EntityCache> = TestBed.inject(Store);
 
   return {
     actions$,

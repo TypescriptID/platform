@@ -36,7 +36,7 @@ NgRx is also powered by memoized selector functions which optimize state query c
 
 In particular, you might use NgRx when you build an application with a lot of user interactions and multiple data sources, when managing state in services are no longer sufficient.
 
-A good substance that might answer the question "Do I need NgRx", is the 
+A good substance that might answer the question "Do I need NgRx", is the
 <a href="https://youtu.be/omnwu_etHTY" target="_blank">**SHARI**</a> principle:
 
 * **S**hared: state that is accessed by many components and services.
@@ -51,7 +51,7 @@ A good substance that might answer the question "Do I need NgRx", is the
 
 
 However, realizing that using NgRx comes with some tradeoffs is also crucial. It is not meant to be the shortest or quickest way to write code and encourage its users the usage of many files.
-It is also often require a steep learning curve, including some good understanding of [`RxJs`](https://rxjs-dev.firebaseapp.com/) and [`Redux`](https://redux.js.org/).
+It also often requires a steep learning curve, including some good understanding of [`RxJs`](https://rxjs-dev.firebaseapp.com/) and [`Redux`](https://redux.js.org/).
 
 
 ## Packages
@@ -62,4 +62,6 @@ It is also often require a steep learning curve, including some good understandi
 - [Router Store](guide/router-store) - Bindings to connect the Angular Router to @ngrx/store.
 - [Entity](guide/entity) - Entity State adapter for managing record collections.
 - [NgRx Data](guide/data) - Extension for simplified entity data management.
+- [NgRx Component](guide/component) - Extension for fully reactive, fully zone-less applications.
+- [ComponentStore](guide/component-store) - Standalone library for managing local/component state.
 - [Schematics](guide/schematics) - Scaffolding library for Angular applications using NgRx libraries.

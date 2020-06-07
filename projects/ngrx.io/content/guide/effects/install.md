@@ -10,7 +10,7 @@ npm install @ngrx/effects --save
 
 ## Installing with `yarn`
 
-For more information on using `yarn` check out the docs <a href="https://yarnpkg.com/docs/usage" target="_blank">here</a>.
+For more information on using `yarn` check out the docs <a href="https://yarnpkg.com/getting-started/usage#installing-all-the-dependencies" target="_blank">here</a>.
 
 ```sh
 yarn add @ngrx/effects
@@ -28,7 +28,7 @@ ng add @ngrx/effects
 
 * path - path to the module that you wish to add the import for the `EffectsModule` to.
 * flat - Indicate if a directory is to be created to hold your effects file
-* skipTest - When true, does not create test files.
+* skipTests - When true, does not create test files.
 * project - name of the project defined in your `angular.json` to help locating the module to add the `EffectsModule` to.
 * module - name of file containing the module that you wish to add the import for the `EffectsModule` to. Can also include the relative path to the file. For example, `src/app/app.module.ts`
 * minimal - By default true, only provide minimal setup for the root effects setup. Only registers `EffectsModule.forRoot()` in the provided `module` with an empty array.

@@ -10,6 +10,8 @@ import {
   pluralize,
 } from './utility/strings';
 
+export { isIvyEnabled } from './utility/angular-utils';
+
 export {
   findNodes,
   getSourceNodes,
@@ -47,6 +49,8 @@ export {
   ModuleOptions,
 } from './utility/find-module';
 
+export { findPropertyInAstObject } from './utility/json-utilts';
+
 export {
   addReducerToState,
   addReducerToStateInterface,
@@ -77,4 +81,12 @@ export { addPackageToPackageJson } from './utility/package';
 
 export { platformVersion } from './utility/libs-version';
 
-export { visitTSSourceFiles, visitNgModuleImports } from './utility/visitors';
+export {
+  visitTSSourceFiles,
+  visitNgModuleImports,
+  visitNgModuleExports,
+  visitComponents,
+  visitDecorator,
+  visitNgModules,
+  visitTemplates,
+} from './utility/visitors';
