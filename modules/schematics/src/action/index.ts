@@ -21,13 +21,9 @@ import {
   parseName,
 } from '@ngrx/schematics/schematics-core';
 
-export default function(options: ActionOptions): Rule {
+export default function (options: ActionOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     options.path = getProjectPath(host, options);
-
-    if (!options.skipTests && options.skipTest) {
-      options.skipTests = options.skipTest;
-    }
 
     const parsedPath = parseName(options.path, options.name);
     options.name = parsedPath.name;
@@ -37,7 +33,7 @@ export default function(options: ActionOptions): Rule {
       url(options.creators ? './creator-files' : './files'),
       [
         options.skipTests
-          ? filter(path => !path.endsWith('.spec.ts.template'))
+          ? filter((path) => !path.endsWith('.spec.ts.template'))
           : noop(),
         applyTemplates({
           ...stringUtils,

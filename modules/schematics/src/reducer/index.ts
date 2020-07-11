@@ -23,19 +23,17 @@ import {
   addReducerImportToNgModule,
   parseName,
   isIvyEnabled,
+  getProject,
 } from '@ngrx/schematics/schematics-core';
 import { Schema as ReducerOptions } from './schema';
 
-export default function(options: ReducerOptions): Rule {
+export default function (options: ReducerOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
+    const projectConfig = getProject(host, options);
     options.path = getProjectPath(host, options);
 
     if (options.module) {
       options.module = findModuleFromOptions(host, options);
-    }
-
-    if (!options.skipTests && options.skipTest) {
-      options.skipTests = options.skipTest;
     }
 
     const parsedPath = parseName(options.path, options.name);
@@ -49,13 +47,15 @@ export default function(options: ReducerOptions): Rule {
           options.flat ? '' : s,
           options.group ? 'reducers' : ''
         ),
-      isIvyEnabled: isIvyEnabled(host, 'tsconfig.json'),
+      isIvyEnabled:
+        isIvyEnabled(host, 'tsconfig.json') &&
+        isIvyEnabled(host, `${projectConfig.root}/tsconfig.app.json`),
       ...(options as object),
     };
 
     const commonTemplate = apply(url('./common-files'), [
       options.skipTests
-        ? filter(path => !path.endsWith('.spec.ts.template'))
+        ? filter((path) => !path.endsWith('.spec.ts.template'))
         : noop(),
       applyTemplates(templateOptions),
       move(parsedPath.path),

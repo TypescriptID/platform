@@ -23,7 +23,7 @@ var_5: &run_in_browser
     - image: circleci/node:12.9.1-browsers
 var_6: &docs_in_node
   docker:
-    - image: circleci/node:10.16
+    - image: circleci/node:12.9.1
 var_7: &docs_in_browser
   docker:
     - image: circleci/node:10.13-browsers
@@ -145,15 +145,12 @@ jobs:
       - run: yarn
       - run:
           name: Build All Release Packages
-          command: yarn build
+          command: yarn build --skip-nx-cache
       # Store artifacts from packages build
       - persist_to_workspace:
           root: dist
           paths:
             - modules/*
-      - run:
-          name: Build Docs
-          command: yarn nx run-many --target=build --projects=docs-app
       # Store artifacts from docs build
       - persist_to_workspace:
           root: projects/ngrx.io/dist
@@ -172,12 +169,8 @@ jobs:
       - run: yarn
       - write_master_hash
       - run:
-          name: Run Affected Release Builds
-          command: yarn nx affected --target=build-release --base=$(cat ~/project/master.txt) --head=$CIRCLE_SHA1
-      # Build docs if necessary
-      - run:
           name: Run Affected Builds
-          command: yarn nx affected --target=build --base=$(cat ~/project/master.txt) --head=$CIRCLE_SHA1
+          command: yarn nx affected --target=build --base=$(cat ~/project/master.txt) --head=$CIRCLE_SHA1 --with-deps
 
   build-bazel:
     <<: *run_in_node

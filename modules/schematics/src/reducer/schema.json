@@ -24,12 +24,6 @@
       "description": "The name of the project.",
       "aliases": ["p"]
     },
-    "skipTest": {
-      "type": "boolean",
-      "description": "When true, does not create test files.",
-      "x-deprecated": "Use skipTests instead.",
-      "default": false
-    },
     "skipTests": {
       "type": "boolean",
       "description": "When true, does not create test files.",
@@ -64,16 +58,14 @@
     "api": {
       "type": "boolean",
       "default": false,
-      "description":
-        "Specifies if api success and failure actions should be added to the reducer",
+      "description": "Specifies if api success and failure actions should be added to the reducer",
       "aliases": ["a"],
       "x-prompt": "Should we add success and failure actions to the reducer?"
     },
     "creators": {
       "type": "boolean",
       "default": true,
-      "description":
-        "Specifies whether to use creator functions for handling actions and reducers.",
+      "description": "Specifies whether to use creator functions for handling actions and reducers.",
       "aliases": ["c"],
       "x-prompt": "Do you want to use the create function?"
     }

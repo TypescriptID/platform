@@ -117,13 +117,9 @@ function getEffectEnd(creators?: boolean) {
   return creators ? '  );\n' + '  });' : ');';
 }
 
-export default function(options: EffectOptions): Rule {
+export default function (options: EffectOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     options.path = getProjectPath(host, options);
-
-    if (!options.skipTests && options.skipTest) {
-      options.skipTests = options.skipTest;
-    }
 
     if (options.module) {
       options.module = findModuleFromOptions(host, options);
@@ -135,9 +131,9 @@ export default function(options: EffectOptions): Rule {
 
     const templateSource = apply(url('./files'), [
       options.skipTests
-        ? filter(path => !path.endsWith('.spec.ts.template'))
+        ? filter((path) => !path.endsWith('.spec.ts.template'))
         : noop(),
-      options.root && options.minimal ? filter(_ => false) : noop(),
+      options.root && options.minimal ? filter((_) => false) : noop(),
       applyTemplates({
         ...stringUtils,
         'if-flat': (s: string) =>

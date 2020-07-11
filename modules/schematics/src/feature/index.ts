@@ -7,11 +7,7 @@ import {
 } from '@angular-devkit/schematics';
 import { Schema as FeatureOptions } from './schema';
 
-export default function(options: FeatureOptions): Rule {
-  if (!options.skipTests && options.skipTest) {
-    options.skipTests = options.skipTest;
-  }
-
+export default function (options: FeatureOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     return chain([
       schematic('action', {

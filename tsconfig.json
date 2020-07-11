@@ -17,7 +17,11 @@
     "strict": true,
     "paths": {
       "@ngrx/component": ["modules/component"],
+      "@ngrx/component/schematics-core": ["modules/component/schematics-core"],
       "@ngrx/component-store": ["modules/component-store"],
+      "@ngrx/component-store/schematics-core": [
+        "modules/component-store/schematics-core"
+      ],
       "@ngrx/data": ["./modules/data"],
       "@ngrx/data/schematics-core": ["./modules/data/schematics-core"],
       "@ngrx/effects": ["./modules/effects"],
