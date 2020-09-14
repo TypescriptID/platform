@@ -7,7 +7,7 @@ import { Schema as RouterStoreOptions } from './schema';
 import {
   getTestProjectPath,
   createWorkspace,
-} from '../../../schematics-core/testing';
+} from '@ngrx/schematics-core/testing';
 
 describe('Router Store ng-add Schematic', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -27,28 +27,34 @@ describe('Router Store ng-add Schematic', () => {
     appTree = await createWorkspace(schematicRunner, appTree);
   });
 
-  it('should update package.json', () => {
+  it('should update package.json', async () => {
     const options = { ...defaultOptions };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const packageJson = JSON.parse(tree.readContent('/package.json'));
 
     expect(packageJson.dependencies['@ngrx/router-store']).toBeDefined();
   });
 
-  it('should skip package.json update', () => {
+  it('should skip package.json update', async () => {
     const options = { ...defaultOptions, skipPackageJson: true };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const packageJson = JSON.parse(tree.readContent('/package.json'));
 
     expect(packageJson.dependencies['@ngrx/router-store']).toBeUndefined();
   });
 
-  it('should be provided by default', () => {
+  it('should be provided by default', async () => {
     const options = { ...defaultOptions };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const content = tree.readContent(`${projectPath}/src/app/app.module.ts`);
     expect(content).toMatch(
       /import { StoreRouterConnectingModule } from '@ngrx\/router-store';/
@@ -56,21 +62,23 @@ describe('Router Store ng-add Schematic', () => {
     expect(content).toMatch(/StoreRouterConnectingModule.forRoot\(\)/);
   });
 
-  it('should import into a specified module', () => {
+  it('should import into a specified module', async () => {
     const options = { ...defaultOptions };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const content = tree.readContent(`${projectPath}/src/app/app.module.ts`);
     expect(content).toMatch(
       /import { StoreRouterConnectingModule } from '@ngrx\/router-store';/
     );
   });
 
-  it('should fail if specified module does not exist', () => {
+  it('should fail if specified module does not exist', async () => {
     const options = { ...defaultOptions, module: '/src/app/app.moduleXXX.ts' };
     let thrownError: Error | null = null;
     try {
-      schematicRunner.runSchematic('ng-add', options, appTree);
+      await schematicRunner.runSchematicAsync('ng-add', options, appTree);
     } catch (err) {
       thrownError = err;
     }

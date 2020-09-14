@@ -17,6 +17,7 @@ import {
   map,
   distinctUntilChanged,
   shareReplay,
+  take,
 } from 'rxjs/operators';
 import { debounceSync } from './debounce-sync';
 import {
@@ -26,15 +27,6 @@ import {
   InjectionToken,
   Inject,
 } from '@angular/core';
-
-/**
- * Return type of the effect, that behaves differently based on whether the
- * argument is passed to the callback.
- */
-export interface EffectReturnFn<T> {
-  (): void;
-  (t: T | Observable<T>): Subscription;
-}
 
 export interface SelectConfig {
   debounce?: boolean;
@@ -46,11 +38,14 @@ export const initialStateToken = new InjectionToken('ComponentStore InitState');
 export class ComponentStore<T extends object> implements OnDestroy {
   // Should be used only in ngOnDestroy.
   private readonly destroySubject$ = new ReplaySubject<void>(1);
-  // Exposed to any extending Store to be used for the teardowns.
+  // Exposed to any extending Store to be used for the teardown.
   readonly destroy$ = this.destroySubject$.asObservable();
 
   private readonly stateSubject$ = new ReplaySubject<T>(1);
   private isInitialized = false;
+  private notInitializedErrorMessage =
+    `${this.constructor.name} has not been initialized yet. ` +
+    `Please make sure it is initialized before updating/getting.`;
   // Needs to be after destroy$ is declared because it's used in select.
   readonly state$: Observable<T> = this.select((s) => s);
 
@@ -79,7 +74,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
    * current state and an argument object) and returns a new instance of the
    * state.
    * @return A function that accepts one argument which is forwarded as the
-   *     second argument to `updaterFn`. Everytime this function is called
+   *     second argument to `updaterFn`. Every time this function is called
    *     subscribers will be notified of the state change.
    */
   updater<V>(
@@ -102,9 +97,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
                   withLatestFrom(this.stateSubject$)
                 )
               : // If state was not initialized, we'll throw an error.
-                throwError(
-                  new Error(`${this.constructor.name} has not been initialized`)
-                )
+                throwError(new Error(this.notInitializedErrorMessage))
           ),
           takeUntil(this.destroy$)
         )
@@ -152,6 +145,20 @@ export class ComponentStore<T extends object> implements OnDestroy {
     }
   }
 
+  protected get(): T;
+  protected get<R>(projector: (s: T) => R): R;
+  protected get<R>(projector?: (s: T) => R): R | T {
+    if (!this.isInitialized) {
+      throw new Error(this.notInitializedErrorMessage);
+    }
+    let value: R | T;
+
+    this.stateSubject$.pipe(take(1)).subscribe((state) => {
+      value = projector ? projector(state) : state;
+    });
+    return value!;
+  }
+
   /**
    * Creates a selector.
    *
@@ -159,7 +166,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
    *
    * @param projector A pure projection function that takes the current state and
    *   returns some new slice/projection of that state.
-   * @param config SelectConfig that changes the behavoir of selector, including
+   * @param config SelectConfig that changes the behavior of selector, including
    *   the debouncing of the values until the state is settled.
    * @return An observable of the projector results.
    */
@@ -231,16 +238,31 @@ export class ComponentStore<T extends object> implements OnDestroy {
    *     subscribed to for the life of the component.
    * @return A function that, when called, will trigger the origin Observable.
    */
-  effect<V, R = unknown>(
-    generator: (origin$: Observable<V>) => Observable<R>
-  ): EffectReturnFn<V> {
-    const origin$ = new Subject<V>();
-    generator(origin$)
+  effect<
+    // This type quickly became part of effect 'API'
+    ProvidedType = void,
+    // The actual origin$ type, which could be unknown, when not specified
+    OriginType extends Observable<ProvidedType> | unknown = Observable<
+      ProvidedType
+    >,
+    // Unwrapped actual type of the origin$ Observable, after default was applied
+    ObservableType = OriginType extends Observable<infer A> ? A : never,
+    // Return either an empty callback or a function requiring specific types as inputs
+    ReturnType = ProvidedType | ObservableType extends void
+      ? () => void
+      : (
+          observableOrValue: ObservableType | Observable<ObservableType>
+        ) => Subscription
+  >(generator: (origin$: OriginType) => Observable<unknown>): ReturnType {
+    const origin$ = new Subject<ObservableType>();
+    generator(origin$ as OriginType)
       // tied to the lifecycle 👇 of ComponentStore
       .pipe(takeUntil(this.destroy$))
       .subscribe();
 
-    return (observableOrValue?: V | Observable<V>): Subscription => {
+    return (((
+      observableOrValue?: ObservableType | Observable<ObservableType>
+    ): Subscription => {
       const observable$ = isObservable(observableOrValue)
         ? observableOrValue
         : of(observableOrValue);
@@ -248,7 +270,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
         // any new 👇 value is pushed into a stream
         origin$.next(value);
       });
-    };
+    }) as unknown) as ReturnType;
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "@ngrx/store",
-  "version": "10.0.0-beta.0",
+  "version": "10.0.0",
   "description": "RxJS powered Redux for Angular apps",
   "repository": {
     "type": "git",
@@ -39,5 +39,8 @@
     ],
     "migrations": "./migrations/migration.json"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "dependencies": {
+    "tslib": "^2.0.0"
+  }
 }

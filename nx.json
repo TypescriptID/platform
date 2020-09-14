@@ -3,9 +3,9 @@
   "implicitDependencies": {
     "angular.json": "*",
     "package.json": "*",
-    "tsconfig.json": "*",
     "tslint.json": "*",
-    "nx.json": "*"
+    "nx.json": "*",
+    "tsconfig.base.json": "*"
   },
   "workspaceLayout": {
     "appsDir": "projects",
@@ -15,7 +15,7 @@
     "default": {
       "runner": "@nrwl/nx-cloud",
       "options": {
-        "accessToken": "ZDE1NTJiNzQtYWE2Ni00ZDMzLThlNjItZTBmMDE0OGRhMzU5fHJlYWQtd3JpdGU=",
+        "accessToken": "NTlmOGIxYmItZjM0OC00YzAxLTgzZTgtZDNiZmExMzcwZTA4fHJlYWQ=",
         "cacheableOperations": [
           "build",
           "build-package",
@@ -76,6 +76,12 @@
         "component",
         "component-store"
       ]
+    },
+    "schematics-core": {
+      "tags": []
     }
+  },
+  "affected": {
+    "defaultBase": "master"
   }
 }

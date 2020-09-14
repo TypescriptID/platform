@@ -15,7 +15,6 @@ import {
   map,
   tap,
   finalize,
-  observeOn,
 } from 'rxjs/operators';
 
 describe('Component Store', () => {
@@ -63,12 +62,24 @@ describe('Component Store', () => {
         const componentStore = new ComponentStore();
 
         m.expect(componentStore.state$).toBeObservable(
-          m.hot('#', {}, new Error('ComponentStore has not been initialized'))
+          m.hot(
+            '#',
+            {},
+            new Error(
+              'ComponentStore has not been initialized yet. ' +
+                'Please make sure it is initialized before updating/getting.'
+            )
+          )
         );
 
         expect(() => {
           componentStore.setState(() => ({ setState: 'new state' }));
-        }).toThrow(new Error('ComponentStore has not been initialized'));
+        }).toThrow(
+          new Error(
+            'ComponentStore has not been initialized yet. ' +
+              'Please make sure it is initialized before updating/getting.'
+          )
+        );
       })
     );
 
@@ -78,14 +89,26 @@ describe('Component Store', () => {
         const componentStore = new ComponentStore();
 
         m.expect(componentStore.state$).toBeObservable(
-          m.hot('#', {}, new Error('ComponentStore has not been initialized'))
+          m.hot(
+            '#',
+            {},
+            new Error(
+              'ComponentStore has not been initialized yet. ' +
+                'Please make sure it is initialized before updating/getting.'
+            )
+          )
         );
 
         expect(() => {
           componentStore.updater((state, value: object) => value)({
             updater: 'new state',
           });
-        }).toThrow(new Error('ComponentStore has not been initialized'));
+        }).toThrow(
+          new Error(
+            'ComponentStore has not been initialized yet. ' +
+              'Please make sure it is initialized before updating/getting.'
+          )
+        );
       })
     );
 
@@ -99,14 +122,26 @@ describe('Component Store', () => {
         });
 
         m.expect(componentStore.state$).toBeObservable(
-          m.hot('#', {}, new Error('ComponentStore has not been initialized'))
+          m.hot(
+            '#',
+            {},
+            new Error(
+              'ComponentStore has not been initialized yet. ' +
+                'Please make sure it is initialized before updating/getting.'
+            )
+          )
         );
 
         expect(() => {
           componentStore.updater<object>((state, value) => value)(
             syncronousObservable$
           );
-        }).toThrow(new Error('ComponentStore has not been initialized'));
+        }).toThrow(
+          new Error(
+            'ComponentStore has not been initialized yet. ' +
+              'Please make sure it is initialized before updating/getting.'
+          )
+        );
       })
     );
 
@@ -123,7 +158,14 @@ describe('Component Store', () => {
         let subscription: Subscription | undefined;
 
         m.expect(componentStore.state$).toBeObservable(
-          m.hot('-#', {}, new Error('ComponentStore has not been initialized'))
+          m.hot(
+            '-#',
+            {},
+            new Error(
+              'ComponentStore has not been initialized yet. ' +
+                'Please make sure it is initialized before updating/getting.'
+            )
+          )
         );
 
         expect(() => {
@@ -383,7 +425,7 @@ describe('Component Store', () => {
         componentStore.state$.subscribe((state) => results.push(state));
 
         // Update with Observable.
-        const subsription = updater(
+        const subscription = updater(
           interval(10).pipe(
             map((v) => ({ value: String(v) })),
             take(10) // just in case
@@ -393,7 +435,7 @@ describe('Component Store', () => {
         // Advance for 40 fake milliseconds and unsubscribe - should capture
         // from '0' to '3'
         advance(40);
-        subsription.unsubscribe();
+        subscription.unsubscribe();
 
         // Advance for 20 more fake milliseconds, to check if anything else
         // is captured
@@ -426,7 +468,7 @@ describe('Component Store', () => {
         componentStore.state$.subscribe((state) => results.push(state));
 
         // Update with Observable.
-        const subsription = updater(
+        const subscription = updater(
           interval(10).pipe(
             map((v) => ({ value: 'a' + v })),
             take(10) // just in case
@@ -444,7 +486,7 @@ describe('Component Store', () => {
         // Advance for 40 fake milliseconds and unsubscribe - should capture
         // from '0' to '3'
         advance(40);
-        subsription.unsubscribe();
+        subscription.unsubscribe();
 
         // Advance for 30 more fake milliseconds, to make sure that second
         // Observable still emits
@@ -1077,7 +1119,7 @@ describe('Component Store', () => {
           origin$.pipe(tap((v) => results.push(typeof v)))
         );
         const effect = componentStore.effect(mockGenerator);
-        effect(undefined);
+        effect();
         effect();
 
         expect(results).toEqual(['undefined', 'undefined']);
@@ -1088,7 +1130,7 @@ describe('Component Store', () => {
       'is run when observable is provided',
       marbles((m) => {
         const mockGenerator = jest.fn((origin$) => origin$);
-        const effect = componentStore.effect(mockGenerator);
+        const effect = componentStore.effect<string>(mockGenerator);
 
         effect(m.cold('-a-b-c|'));
 
@@ -1101,7 +1143,7 @@ describe('Component Store', () => {
       'is run with multiple Observables',
       marbles((m) => {
         const mockGenerator = jest.fn((origin$) => origin$);
-        const effect = componentStore.effect(mockGenerator);
+        const effect = componentStore.effect<string>(mockGenerator);
 
         effect(m.cold('-a-b-c|'));
         effect(m.hot(' --d--e----f-'));
@@ -1128,12 +1170,12 @@ describe('Component Store', () => {
           );
 
           // Update with Observable.
-          const subsription = effect(observable$);
+          const subscription = effect(observable$);
 
           // Advance for 40 fake milliseconds and unsubscribe - should capture
           // from '0' to '3'
           advance(40);
-          subsription.unsubscribe();
+          subscription.unsubscribe();
 
           // Advance for 20 more fake milliseconds, to check if anything else
           // is captured
@@ -1154,7 +1196,7 @@ describe('Component Store', () => {
           );
 
           // Pass the first Observable to the effect.
-          const subsription = effect(
+          const subscription = effect(
             interval(10).pipe(
               map((v) => ({ value: 'a' + v })),
               take(10) // just in case
@@ -1172,7 +1214,7 @@ describe('Component Store', () => {
           // Advance for 40 fake milliseconds and unsubscribe - should capture
           // from '0' to '3'
           advance(40);
-          subsription.unsubscribe();
+          subscription.unsubscribe();
 
           // Advance for 30 more fake milliseconds, to make sure that second
           // Observable still emits
@@ -1194,7 +1236,7 @@ describe('Component Store', () => {
       );
 
       it('completes when componentStore is destroyed', (doneFn: jest.DoneCallback) => {
-        componentStore.effect((origin$) =>
+        componentStore.effect((origin$: Observable<number>) =>
           origin$.pipe(
             finalize(() => {
               doneFn();
@@ -1207,7 +1249,7 @@ describe('Component Store', () => {
       });
 
       it('observable argument completes when componentStore is destroyed', (doneFn: jest.DoneCallback) => {
-        componentStore.effect((origin$) => origin$)(
+        componentStore.effect((origin$: Observable<number>) => origin$)(
           interval(10).pipe(
             finalize(() => {
               doneFn();
@@ -1219,6 +1261,62 @@ describe('Component Store', () => {
 
         jest.advanceTimersByTime(20);
       });
+    });
+  });
+
+  describe('get', () => {
+    interface State {
+      value: string;
+    }
+
+    class ExposedGetComponentStore extends ComponentStore<State> {
+      get = super.get;
+    }
+
+    let componentStore: ExposedGetComponentStore;
+
+    it('throws an Error if called before the state is initialized', () => {
+      componentStore = new ExposedGetComponentStore();
+
+      expect(() => {
+        componentStore.get((state) => state.value);
+      }).toThrow(
+        new Error(
+          'ExposedGetComponentStore has not been initialized yet. ' +
+            'Please make sure it is initialized before updating/getting.'
+        )
+      );
+    });
+
+    it('does not throw an Error when initialized', () => {
+      componentStore = new ExposedGetComponentStore();
+      componentStore.setState({ value: 'init' });
+
+      expect(() => {
+        componentStore.get((state) => state.value);
+      }).not.toThrow();
+    });
+
+    it('provides values from the state', () => {
+      componentStore = new ExposedGetComponentStore();
+      componentStore.setState({ value: 'init' });
+
+      expect(componentStore.get((state) => state.value)).toBe('init');
+
+      componentStore.updater((state, value: string) => ({ value }))('updated');
+
+      expect(componentStore.get((state) => state.value)).toBe('updated');
+    });
+
+    it('provides the entire state when projector fn is not provided', () => {
+      componentStore = new ExposedGetComponentStore();
+      componentStore.setState({ value: 'init' });
+
+      expect(componentStore.get()).toEqual({ value: 'init' });
+
+      componentStore.updater((state, value: string) => ({ value }))('updated');
+
+      expect(componentStore.get()).toEqual({ value: 'updated' });
     });
   });
 });

@@ -4,7 +4,7 @@ import {
   UnitTestTree,
 } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
-import { createPackageJson } from '../../../schematics-core/testing/create-package';
+import { createPackageJson } from '@ngrx/schematics-core/testing/create-package';
 
 describe('Effects Migration 9_0_0', () => {
   let appTree: UnitTestTree;
@@ -129,15 +129,13 @@ export class LogEffects {
       });
     });
 
-    function test(input: string, expected: string) {
+    async function test(input: string, expected: string) {
       appTree.create('./app.module.ts', input);
       const runner = new SchematicTestRunner('schematics', collectionPath);
 
-      const newTree = runner.runSchematic(
-        `ngrx-${pkgName}-migration-02`,
-        {},
-        appTree
-      );
+      const newTree = await runner
+        .runSchematicAsync(`ngrx-${pkgName}-migration-02`, {}, appTree)
+        .toPromise();
       const file = newTree.readContent('app.module.ts');
 
       expect(file).toBe(expected);

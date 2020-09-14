@@ -4,7 +4,7 @@ import {
 } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { Schema as EntityOptions } from './schema';
-import { createWorkspace } from '../../../schematics-core/testing';
+import { createWorkspace } from '@ngrx/schematics-core/testing';
 
 describe('Entity ng-add Schematic', () => {
   const schematicRunner = new SchematicTestRunner(
@@ -21,19 +21,23 @@ describe('Entity ng-add Schematic', () => {
     appTree = await createWorkspace(schematicRunner, appTree);
   });
 
-  it('should update package.json', () => {
+  it('should update package.json', async () => {
     const options = { ...defaultOptions };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const packageJson = JSON.parse(tree.readContent('/package.json'));
 
     expect(packageJson.dependencies['@ngrx/entity']).toBeDefined();
   });
 
-  it('should skip package.json update', () => {
+  it('should skip package.json update', async () => {
     const options = { ...defaultOptions, skipPackageJson: true };
 
-    const tree = schematicRunner.runSchematic('ng-add', options, appTree);
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', options, appTree)
+      .toPromise();
     const packageJson = JSON.parse(tree.readContent('/package.json'));
 
     expect(packageJson.dependencies['@ngrx/entity']).toBeUndefined();

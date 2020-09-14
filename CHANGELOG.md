@@ -1,3 +1,67 @@
+<a name="10.0.0"></a>
+
+# [10.0.0](https://github.com/ngrx/platform/compare/10.0.0-rc.0...10.0.0) (2020-08-10)
+
+<a name="10.0.0-rc.0"></a>
+
+# [10.0.0-rc.0](https://github.com/ngrx/platform/compare/10.0.0-beta.1...10.0.0-rc.0) (2020-08-06)
+
+### Bug Fixes
+
+- **router-store:** add safety check to schematic ([#2632](https://github.com/ngrx/platform/issues/2632)) ([255e9e8](https://github.com/ngrx/platform/commit/255e9e8))
+
+### Code Refactoring
+
+- **component-store:** fine-tune effect types ([#2645](https://github.com/ngrx/platform/issues/2645)) ([ee92912](https://github.com/ngrx/platform/commit/ee92912))
+
+### Features
+
+- **entity:** add mapOne adapter method ([#2628](https://github.com/ngrx/platform/issues/2628)) ([d1891ad](https://github.com/ngrx/platform/commit/d1891ad)), closes [#2538](https://github.com/ngrx/platform/issues/2538)
+
+### BREAKING CHANGES
+
+- **component-store:** EffectReturnFn has been removed and the effect type is stricter and more predictable.
+
+BEFORE:
+
+If effect was const e = effect((o: Observable<string>) => ....) it was still possible to call e() without passing any strings
+
+AFTER:
+
+If effect was const e = effect((o: Observable<string>) => ....) its not allowed to call e() without passing any strings
+
+<a name="10.0.0-beta.1"></a>
+
+# [10.0.0-beta.1](https://github.com/ngrx/platform/compare/10.0.0-beta.0...10.0.0-beta.1) (2020-07-20)
+
+### Bug Fixes
+
+- **example-app:** update snapshot ([f2af688](https://github.com/ngrx/platform/commit/f2af688))
+- **schematics:** fix unit tests for JSON with comments ([155ec1c](https://github.com/ngrx/platform/commit/155ec1c))
+
+### Features
+
+- **component:** add ng-add and ng-update schematics ([#2611](https://github.com/ngrx/platform/issues/2611)) ([3f2bea4](https://github.com/ngrx/platform/commit/3f2bea4))
+- **component-store:** add config for debounce selectors ([#2606](https://github.com/ngrx/platform/issues/2606)) ([ddf0271](https://github.com/ngrx/platform/commit/ddf0271))
+- **component-store:** add imperative reads ([#2614](https://github.com/ngrx/platform/issues/2614)) ([2146774](https://github.com/ngrx/platform/commit/2146774))
+- **component-store:** add ng-add and ng-update schematics ([#2598](https://github.com/ngrx/platform/issues/2598)) ([af7b2cc](https://github.com/ngrx/platform/commit/af7b2cc)), closes [#2569](https://github.com/ngrx/platform/issues/2569)
+
+### schematics
+
+- remove skipTest option ([#2596](https://github.com/ngrx/platform/issues/2596)) ([60cd5cc](https://github.com/ngrx/platform/commit/60cd5cc)), closes [#2561](https://github.com/ngrx/platform/issues/2561)
+
+### BREAKING CHANGES
+
+- The skipTest option has been renamed to skipTests
+
+BEFORE:
+
+ng generate container UsersPage --skipTest
+
+AFTER:
+
+ng generate container UsersPage --skipTests
+
 <a name="10.0.0-beta.0"></a>
 
 # [10.0.0-beta.0](https://github.com/ngrx/platform/compare/9.2.0...10.0.0-beta.0) (2020-06-25)
