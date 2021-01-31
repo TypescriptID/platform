@@ -141,6 +141,14 @@ export class EntityCollectionServiceBase<
    * @returns Observable of the entity
    * after server reports successful save or the save error.
    */
+  add(
+    entity: Partial<T>,
+    options: EntityActionOptions & { isOptimistic: false }
+  ): Observable<T>;
+  add(
+    entity: T,
+    options?: EntityActionOptions & { isOptimistic?: true }
+  ): Observable<T>;
   add(entity: T, options?: EntityActionOptions): Observable<T> {
     return this.dispatcher.add(entity, options);
   }
