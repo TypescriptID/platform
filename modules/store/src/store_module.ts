@@ -37,7 +37,7 @@ import {
   USER_PROVIDED_META_REDUCERS,
   _RESOLVED_META_REDUCERS,
   _ROOT_STORE_GUARD,
-  _ACTIVE_RUNTIME_CHECKS,
+  ACTIVE_RUNTIME_CHECKS,
   _ACTION_TYPE_UNIQUENESS_CHECK,
 } from './tokens';
 import { ACTIONS_SUBJECT_PROVIDERS, ActionsSubject } from './actions_subject';
@@ -86,7 +86,8 @@ export class StoreFeatureModule implements OnDestroy {
   ) {
     const feats = features.map((feature, index) => {
       const featureReducerCollection = featureReducers.shift();
-      const reducers = featureReducerCollection /*TODO(#823)*/![index];
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const reducers = featureReducerCollection! /*TODO(#823)*/[index];
 
       return {
         ...feature,
@@ -98,6 +99,7 @@ export class StoreFeatureModule implements OnDestroy {
     reducerManager.addFeatures(feats);
   }
 
+  // eslint-disable-next-line @angular-eslint/contextual-lifecycle
   ngOnDestroy() {
     this.reducerManager.removeFeatures(this.features);
   }

@@ -22,7 +22,7 @@ export interface ReducerTypes<
 
 // Specialized Reducer that is aware of the Action type it needs to handle
 export interface OnReducer<State, Creators extends readonly ActionCreator[]> {
-  (state: State, action: ActionType<Creators[number]>): { [P in keyof State]: State[P] };
+  (state: State, action: ActionType<Creators[number]>): State;
 }
 
 /**
@@ -40,11 +40,14 @@ export interface OnReducer<State, Creators extends readonly ActionCreator[]> {
  * ```
  */
 export function on<State, Creators extends readonly ActionCreator[]>(
-  ...args: [...creators: Creators, reducer: OnReducer<State, Creators>]
+  ...args: [
+    ...creators: Creators,
+    reducer: OnReducer<State extends infer S ? S : never, Creators>
+  ]
 ): ReducerTypes<State, Creators> {
   // This could be refactored when TS releases the version with this fix:
   // https://github.com/microsoft/TypeScript/pull/41544
-  const reducer = args.pop() as OnReducer<State, Creators>;
+  const reducer = args.pop() as OnReducer<any, Creators>;
   const types = (((args as unknown) as Creators).map(
     (creator) => creator.type
   ) as unknown) as ExtractActionTypes<Creators>;
@@ -104,8 +107,8 @@ export function createReducer<S, A extends Action = Action>(
   ...ons: ReducerTypes<S, ActionCreator[]>[]
 ): ActionReducer<S, A> {
   const map = new Map<string, OnReducer<S, ActionCreator[]>>();
-  for (let on of ons) {
-    for (let type of on.types) {
+  for (const on of ons) {
+    for (const type of on.types) {
       const existingReducer = map.get(type);
       if (existingReducer) {
         const newReducer: typeof existingReducer = (state, action) =>
