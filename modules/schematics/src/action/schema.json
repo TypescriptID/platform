@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "id": "SchematicsNgRxAction",
+  "$id": "SchematicsNgRxAction",
   "title": "NgRx Action Options Schema",
   "type": "object",
   "properties": {
@@ -12,6 +12,12 @@
         "index": 0
       },
       "x-prompt": "What should be the name of the action?"
+    },
+    "prefix": {
+      "description": "The prefix of the action.",
+      "type": "string",
+      "default": "load",
+      "x-prompt": "What should be the prefix of the action?"
     },
     "path": {
       "type": "string",
