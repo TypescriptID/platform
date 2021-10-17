@@ -1,3 +1,44 @@
+<a name="12.5.0"></a>
+
+# [12.5.0](https://github.com/ngrx/platform/compare/12.4.0...12.5.0) (2021-10-14)
+
+### Bug Fixes
+
+- **entity:** set correct input argument types for removeMutably methods ([#3148](https://github.com/ngrx/platform/issues/3148)) ([9611415](https://github.com/ngrx/platform/commit/9611415))
+- **schematics:** add missing method ([#3157](https://github.com/ngrx/platform/issues/3157)) ([2a927a2](https://github.com/ngrx/platform/commit/2a927a2))
+- **schematics:** use prefix option in feature schematic ([#3139](https://github.com/ngrx/platform/issues/3139)) ([5fa8890](https://github.com/ngrx/platform/commit/5fa8890)), closes [#3116](https://github.com/ngrx/platform/issues/3116)
+
+### Features
+
+- update to RxJS 7.4.x ([#3109](https://github.com/ngrx/platform/issues/3109)) ([4a42550](https://github.com/ngrx/platform/commit/4a42550))
+
+<a name="12.4.0"></a>
+
+# [12.4.0](https://github.com/ngrx/platform/compare/12.3.0...12.4.0) (2021-08-11)
+
+### Bug Fixes
+
+- **component:** capture errors from observable when using `ngrxPush` pipe and `ngrxLet` directive ([23c846b](https://github.com/ngrx/platform/commit/23c846b)), closes [#3100](https://github.com/ngrx/platform/issues/3100)
+
+### Features
+
+- **router-store:** add createRouterSelector to select router data for default config ([#3103](https://github.com/ngrx/platform/issues/3103)) ([507f58e](https://github.com/ngrx/platform/commit/507f58e))
+
+<a name="12.3.0"></a>
+
+# [12.3.0](https://github.com/ngrx/platform/compare/12.2.0...12.3.0) (2021-07-22)
+
+### Bug Fixes
+
+- **component-store:** accept error type in tapResponse with strict generic checks ([#3068](https://github.com/ngrx/platform/issues/3068)) ([3e02e37](https://github.com/ngrx/platform/commit/3e02e37)), closes [#3056](https://github.com/ngrx/platform/issues/3056)
+- **data:** immutably delete an entity ([#3040](https://github.com/ngrx/platform/issues/3040)) ([a6c199f](https://github.com/ngrx/platform/commit/a6c199f)), closes [#2553](https://github.com/ngrx/platform/issues/2553)
+- **data:** SAVE_ENTITIES_CANCELED type in SaveEntitiesCanceled ([#3079](https://github.com/ngrx/platform/issues/3079)) ([b24c1e0](https://github.com/ngrx/platform/commit/b24c1e0)), closes [#3065](https://github.com/ngrx/platform/issues/3065)
+- **store:** make readonly usage consistent ([#3050](https://github.com/ngrx/platform/issues/3050)) ([#3069](https://github.com/ngrx/platform/issues/3069)) ([a39b278](https://github.com/ngrx/platform/commit/a39b278))
+
+### Features
+
+- **store:** make reducers accessible from ReducerManager ([#3064](https://github.com/ngrx/platform/issues/3064)) ([bf2bd1a](https://github.com/ngrx/platform/commit/bf2bd1a))
+
 <a name="12.2.0"></a>
 
 # [12.2.0](https://github.com/ngrx/platform/compare/12.1.0...12.2.0) (2021-06-29)

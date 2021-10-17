@@ -18,7 +18,7 @@ export class Actions<V = Action> extends Observable<V> {
     }
   }
 
-  lift<R>(operator: Operator<V, R>): Observable<R> {
+  override lift<R>(operator: Operator<V, R>): Observable<R> {
     const observable = new Actions<R>();
     observable.source = this;
     observable.operator = operator;
@@ -116,6 +116,19 @@ export function ofType<V extends Action>(
  * Unfortunately, for unknown 'actions: Actions' these types will produce
  * 'Observable<never>'. In such cases one has to manually set the generic type
  * like `actions.ofType<AdditionAction>('add')`.
+ *
+ * @usageNotes
+ *
+ * Filter the Actions stream on the "customers page loaded" action
+ *
+ * ```ts
+ * import { ofType } from '@ngrx/effects';
+ * import * fromCustomers from '../customers';
+ *
+ * this.actions$.pipe(
+ *  ofType(fromCustomers.pageLoaded)
+ * )
+ * ```
  */
 export function ofType(
   ...allowedTypes: Array<string | ActionCreator<string, Creator>>
