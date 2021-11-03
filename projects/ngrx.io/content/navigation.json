@@ -110,6 +110,10 @@
                 {
                   "title": "Meta-Reducers",
                   "url": "guide/store/metareducers"
+                },
+                {
+                  "title": "Feature Creators",
+                  "url": "guide/store/feature-creators"
                 }
               ]
             },
@@ -457,6 +461,10 @@
         {
           "title": "Nightly Builds",
           "url": "guide/nightlies"
+        },
+        {
+          "title": "ESLint NgRx Plugin",
+          "url": "guide/eslint-plugin"
         }
       ]
     },
@@ -539,7 +547,7 @@
           "tooltip": "Stack Overflow: where the community answers your technical NgRx questions."
         },
         {
-          "url": "https://discord.gg/gCEj4zC",
+          "url": "https://discord.com/invite/ngrx",
           "title": "Discord Server",
           "tooltip": "NgRx Community Discord Server - chat with other members of the community."
         },
