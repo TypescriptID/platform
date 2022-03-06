@@ -10,7 +10,6 @@ import {
 } from '@example-app/books/components';
 import { SelectedBookPageComponent } from '@example-app/books/containers';
 import { Book, generateMockBook } from '@example-app/books/models';
-import * as fromBooks from '@example-app/books/reducers';
 import { AddCommasPipe } from '@example-app/shared/pipes/add-commas.pipe';
 import { MaterialModule } from '@example-app/material';
 
@@ -35,7 +34,7 @@ describe('Selected Book Page', () => {
     instance = fixture.componentInstance;
     store = TestBed.inject(MockStore);
 
-    spyOn(store, 'dispatch');
+    jest.spyOn(store, 'dispatch');
   });
 
   it('should compile', () => {

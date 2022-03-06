@@ -1,3 +1,26 @@
+<a name="13.0.2"></a>
+
+## [13.0.2](https://github.com/ngrx/platform/compare/13.0.1...13.0.2) (2021-12-07)
+
+### Bug Fixes
+
+- **component:** fixes recursive rendering ([#3255](https://github.com/ngrx/platform/issues/3255)) ([d24dde1](https://github.com/ngrx/platform/commit/d24dde1)), closes [#3246](https://github.com/ngrx/platform/issues/3246)
+- **store:** remove afterEach hook in mock store ([#3245](https://github.com/ngrx/platform/issues/3245)) ([0640085](https://github.com/ngrx/platform/commit/0640085)), closes [#3243](https://github.com/ngrx/platform/issues/3243)
+- **store:** update installation of the NgRx ESLint Plugin ([#3259](https://github.com/ngrx/platform/issues/3259)) ([df211fe](https://github.com/ngrx/platform/commit/df211fe))
+- set correct dist paths for testing packages ([#3249](https://github.com/ngrx/platform/issues/3249)) ([ed9f6f1](https://github.com/ngrx/platform/commit/ed9f6f1)), closes [#3248](https://github.com/ngrx/platform/issues/3248)
+
+<a name="13.0.1"></a>
+
+## [13.0.1](https://github.com/ngrx/platform/compare/13.0.0...13.0.1) (2021-11-17)
+
+### Bug Fixes
+
+- **store:** add migration for create selector generics ([#3237](https://github.com/ngrx/platform/issues/3237)) ([5d97a11](https://github.com/ngrx/platform/commit/5d97a11))
+
+<a name="13.0.0"></a>
+
+# [13.0.0](https://github.com/ngrx/platform/compare/13.0.0-rc.0...13.0.0) (2021-11-16)
+
 <a name="13.0.0-rc.0"></a>
 
 # [13.0.0-rc.0](https://github.com/ngrx/platform/compare/13.0.0-beta.0...13.0.0-rc.0) (2021-11-11)

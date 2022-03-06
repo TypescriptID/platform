@@ -19,7 +19,6 @@ import { MaterialModule } from '@example-app/material';
 describe('Collection Page', () => {
   let fixture: ComponentFixture<CollectionPageComponent>;
   let store: MockStore;
-  let instance: CollectionPageComponent;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -40,10 +39,9 @@ describe('Collection Page', () => {
     });
 
     fixture = TestBed.createComponent(CollectionPageComponent);
-    instance = fixture.componentInstance;
     store = TestBed.inject(MockStore);
 
-    spyOn(store, 'dispatch');
+    jest.spyOn(store, 'dispatch');
   });
 
   it('should compile', () => {
