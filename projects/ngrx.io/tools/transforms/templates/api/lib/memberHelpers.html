@@ -3,24 +3,24 @@
 
 {%- macro renderHeritage(exportDoc) -%}
   {%- if exportDoc.extendsClauses.length %} extends {% for clause in exportDoc.extendsClauses -%}
-  {% if clause.doc.path %}<a class="code-anchor" href="{$ clause.doc.path $}">{$ clause.text | escape $}</a>{% else %}{$ clause.text | escape $}{% endif %}{% if not loop.last %}, {% endif -%}
+  {$ clause.text | escape $}{% if not loop.last %}, {% endif -%}
   {% endfor %}{% endif %}
   {%- if exportDoc.implementsClauses.length %} implements {% for clause in exportDoc.implementsClauses -%}
-  <a class="code-anchor" href="{$ clause.doc.path $}">{$ clause.text | escape $}</a>{% if not loop.last %}, {% endif -%}
+  {$ clause.text | escape $}{% if not loop.last %}, {% endif -%}
   {% endfor %}{% endif %}
 {%- endmacro -%}
 
 {%- macro renderMembers(doc) -%}
   {%- for member in doc.staticProperties %}{% if not member.internal %}
-  <a class="code-anchor" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
+  <a class="code-anchor{% if member.deprecated %} deprecated-api-item{% endif %}" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
   {% for member in doc.staticMethods %}{% if not member.internal %}
-  <a class="code-anchor" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
+  <a class="code-anchor{% if member.deprecated %} deprecated-api-item{% endif %}" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
   {% if doc.constructorDoc and not doc.constructorDoc.internal %}
-  <a class="code-anchor" href="{$ doc.path $}#{$ doc.constructorDoc.anchor | urlencode $}">{$ renderMemberSyntax(doc.constructorDoc, 1) $}</a>{% endif -%}
+  <a class="code-anchor{% if member.deprecated %} deprecated-api-item{% endif %}" href="{$ doc.path $}#{$ doc.constructorDoc.anchor | urlencode $}">{$ renderMemberSyntax(doc.constructorDoc, 1) $}</a>{% endif -%}
   {% for member in doc.properties %}{% if not member.internal %}
-  <a class="code-anchor" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
+  <a class="code-anchor{% if member.deprecated %} deprecated-api-item{% endif %}" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
   {% for member in doc.methods %}{% if not member.internal %}
-  <a class="code-anchor" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
+  <a class="code-anchor{% if member.deprecated %} deprecated-api-item{% endif %}" href="{$ doc.path $}#{$ member.anchor | urlencode $}">{$ renderMemberSyntax(member, 1) $}</a>{% endif %}{% endfor -%}
 
   {%- for ancestor in doc.extendsClauses %}{% if ancestor.doc %}
 
@@ -46,7 +46,7 @@
   {$ overload.shortDescription | marked $}
 </div>{% endif %}
 
-<code-example language="ts" hideCopy="true" linenums="false" class="no-box api-heading">{$ renderMemberSyntax(overload) $}</code-example>
+<code-example language="ts" hideCopy="true" linenums="false" class="no-box api-heading{% if overload.deprecated %} deprecated-api-item{% endif %}">{$ renderMemberSyntax(overload) $}</code-example>
 
 {% if overload.deprecated !== undefined %}
 <div class="deprecated">
@@ -54,7 +54,7 @@
 </div>{% endif %}
 
 <h4 class="no-anchor">Parameters</h4>
-{$ params.renderParameters(overload.parameterDocs, cssClass + '-parameters', cssClass + '-parameter') $}
+{$ params.renderParameters(overload.parameterDocs, cssClass + '-parameters', cssClass + '-parameter', true) $}
 
 {% if overload.type or overload.returns.type %}
 <h4 class="no-anchor">Returns</h4>
@@ -186,7 +186,7 @@
       <tr class="{$ propertyClass $}">
         <td>
           <a id="{$ property.anchor $}"></a>
-          <code>{$ renderMemberSyntax(property) $}</code>
+          <code{% if property.deprecated %} class="deprecated-api-item"{% endif %}>{$ renderMemberSyntax(property) $}</code>
         </td>
         <td>
           {%- if (property.isGetAccessor or property.isReadonly) and not property.isSetAccessor %}<span class='read-only-property'>Read-only.</span>{% endif %}
