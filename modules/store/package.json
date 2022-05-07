@@ -1,6 +1,6 @@
 {
   "name": "@ngrx/store",
-  "version": "13.0.2",
+  "version": "13.1.0",
   "description": "RxJS powered Redux for Angular apps",
   "repository": {
     "type": "git",
@@ -35,7 +35,8 @@
       "@ngrx/schematics",
       "@ngrx/store-devtools",
       "@ngrx/component-store",
-      "@ngrx/component"
+      "@ngrx/component",
+      "@ngrx/eslint-plugin"
     ],
     "migrations": "./migrations/migration.json"
   },
