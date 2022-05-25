@@ -59,7 +59,7 @@ We can track next, error, and complete events:
   <app-number [number]="n" *ngIf="!e && !c">
   </app-number>
 
-  <p *ngIf="e">There is an error.</p>
+  <p *ngIf="e">There is an error: {{ e }}</p>
   <p *ngIf="c">Observable is completed.</p>
 </ng-container>
 ```
@@ -95,5 +95,5 @@ the suspense template will be displayed again until the new observable emits the
 - Takes away the multiple usages of the `async` or `ngrxPush` pipe.
 - Provides a unified/structured way of handling `null` and `undefined`.
 - Triggers the change detection differently if `zone.js` is present or not
-  using the `ChangeDetectorRef.markForCheck` or `ChangeDetectorRef.detectChanges`.
-- Distinct the same values in a row using the `distinctUntilChanged` operator.
+  using `ChangeDetectorRef.markForCheck` or `ɵmarkDirty`.
+- Distinct the same values in a row for better performance.
