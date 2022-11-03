@@ -1,40 +1,35 @@
 import {
   chain,
-  noop,
   Rule,
   SchematicContext,
   Tree,
 } from '@angular-devkit/schematics';
 import { getWorkspace, getWorkspacePath } from '../../schematics-core';
 
-import { Schema as SchematicOptions } from './schema';
-
-function updateWorkspaceCli(host: Tree, value: any) {
+function updateSchematicCollections(host: Tree) {
   const workspace = getWorkspace(host);
   const path = getWorkspacePath(host);
 
-  workspace['cli'] = {
-    ...workspace['cli'],
-    ...value,
-  };
+  workspace.cli = workspace.cli || {};
+  workspace.cli.schematicCollections = workspace.cli.schematicCollections || [];
+  if (workspace.cli.defaultCollection) {
+    workspace.cli.schematicCollections.push(workspace.cli.defaultCollection);
+    delete workspace.cli.defaultCollection;
+  }
+  workspace.cli.schematicCollections.push('@ngrx/schematics');
 
   host.overwrite(path, JSON.stringify(workspace, null, 2));
 }
 
-function setAsDefaultSchematics() {
-  const cli = {
-    defaultCollection: '@ngrx/schematics',
-  };
+function updateWorkspaceCli() {
   return (host: Tree) => {
-    updateWorkspaceCli(host, cli);
+    updateSchematicCollections(host);
     return host;
   };
 }
 
-export default function (options: SchematicOptions): Rule {
+export default function (): Rule {
   return (host: Tree, context: SchematicContext) => {
-    return chain([
-      options && options.defaultCollection ? setAsDefaultSchematics() : noop(),
-    ])(host, context);
+    return chain([updateWorkspaceCli()])(host, context);
   };
 }

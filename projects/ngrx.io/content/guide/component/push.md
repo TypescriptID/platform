@@ -6,21 +6,45 @@ running in zone-full as well as zone-less mode without any changes to the code.
 
 ## Usage
 
-The `ngrxPush` pipe is provided through the `ReactiveComponentModule`.
-To use it, add the `ReactiveComponentModule` to the `imports` of your NgModule:
+The `ngrxPush` pipe is provided through the `PushModule`.
+To use it, add the `PushModule` to the `imports` of your standalone component or NgModule:
 
-```typescript
+```ts
+import { Component } from '@angular/core';
+import { PushModule } from '@ngrx/component';
+
+@Component({
+  // ... other metadata
+  standalone: true,
+  imports: [
+    // ... other imports
+    PushModule,
+  ],
+})
+export class MyStandaloneComponent {}
+```
+
+The `ngrxPush` pipe can be also used by importing the `ReactiveComponentModule`:
+
+```ts
 import { NgModule } from '@angular/core';
 import { ReactiveComponentModule } from '@ngrx/component';
 
 @NgModule({
   imports: [
-    // other imports
-    ReactiveComponentModule
-  ]
+    // ... other imports
+    ReactiveComponentModule,
+  ],
 })
 export class MyFeatureModule {}
 ```
+
+<div class="alert is-critical">
+
+`ReactiveComponentModule` is deprecated in favor of `PushModule`.
+See the [migration guide](guide/migration/v14#reactivecomponentmodule) for more information.
+
+</div>
 
 ## Comparison with `async` Pipe
 
@@ -50,10 +74,22 @@ an observable emits a new value. It can be used as follows:
 <app-number [number]="number$ | ngrxPush"></app-number>
 ```
 
+## Combining Multiple Observables
+
+The `ngrxPush` pipe can be also used with a dictionary of observables in the
+following way:
+
+```html
+<code>
+  {{ { users: users$, query: query$ } | ngrxPush | json }}
+</code>
+```
+
 ## Included Features
 
 - Takes observables or promises, retrieves their values, and passes the value to the template.
+- Allows combining multiple observables in the template.
 - Handles `null` and `undefined` values in a clean unified/structured way.
-- Triggers the change detection differently if `zone.js` is present or not
-  using `ChangeDetectorRef.markForCheck` or `ɵmarkDirty`.
+- Triggers change detection using the `RenderScheduler` that behaves differently in
+  zone-full and zone-less mode.
 - Distinct the same values in a row for better performance.

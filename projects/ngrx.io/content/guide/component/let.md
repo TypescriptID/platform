@@ -5,8 +5,25 @@ The `*ngrxLet` directive serves a convenient way of binding observables to a vie
 
 ## Usage
 
-The `*ngrxLet` directive is provided through the `ReactiveComponentModule`.
-To use it, add the `ReactiveComponentModule` to the `imports` of your NgModule:
+The `*ngrxLet` directive is provided through the `LetModule`.
+To use it, add the `LetModule` to the `imports` of your standalone component or NgModule:
+
+```ts
+import { Component } from '@angular/core';
+import { LetModule } from '@ngrx/component';
+
+@Component({
+  // ... other metadata
+  standalone: true,
+  imports: [
+    // ... other imports
+    LetModule,
+  ],
+})
+export class MyStandaloneComponent {}
+```
+
+The `*ngrxLet` directive can be also used by importing the `ReactiveComponentModule`:
 
 ```ts
 import { NgModule } from '@angular/core';
@@ -14,12 +31,19 @@ import { ReactiveComponentModule } from '@ngrx/component';
 
 @NgModule({
   imports: [
-    // other imports
+    // ... other imports
     ReactiveComponentModule,
   ],
 })
 export class MyFeatureModule {}
 ```
+
+<div class="alert is-critical">
+
+`ReactiveComponentModule` is deprecated in favor of `LetModule`.
+See the [migration guide](guide/migration/v14#reactivecomponentmodule) for more information.
+
+</div>
 
 ## Comparison with `*ngIf` and `async`
 
@@ -61,6 +85,18 @@ We can track next, error, and complete events:
 
   <p *ngIf="e">There is an error: {{ e }}</p>
   <p *ngIf="c">Observable is completed.</p>
+</ng-container>
+```
+
+## Combining Multiple Observables
+
+The `*ngrxLet` directive can be also used with a dictionary of observables.
+This feature provides the ability to create a view model object in the template:
+
+```html
+<ng-container *ngrxLet="{ users: users$, query: query$ } as vm">
+  <app-search-bar [query]="vm.query"></app-search-bar>
+  <app-user-list [users]="vm.users"></app-user-list>
 </ng-container>
 ```
 
@@ -110,8 +146,9 @@ This feature provides the ability to create readable templates by using aliases 
   (See ["Comparison with `*ngIf` and `async`"](#comparison-with-ngif-and-async) section)
 - Takes away the multiple usages of the `async` or `ngrxPush` pipe.
 - Allows displaying different content based on the current state of an observable.
+- Allows combining multiple observables in the template.
 - Provides a unified/structured way of handling `null` and `undefined`.
 - Provides the ability to create readable templates by using aliases for nested properties.
-- Triggers the change detection differently if `zone.js` is present or not
-  using `ChangeDetectorRef.markForCheck` or `ɵmarkDirty`.
+- Triggers change detection using the `RenderScheduler` that behaves differently in
+  zone-full and zone-less mode.
 - Distinct the same values in a row for better performance.

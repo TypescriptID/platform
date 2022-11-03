@@ -1,22 +1,13 @@
-import {
-  ChangeDetectorRef,
-  ErrorHandler,
-  NgZone,
-  OnDestroy,
-  Pipe,
-  PipeTransform,
-} from '@angular/core';
+import { ErrorHandler, OnDestroy, Pipe, PipeTransform } from '@angular/core';
 import { Unsubscribable } from 'rxjs';
-import { ObservableOrPromise } from '../core/potential-observable';
+import { PotentialObservableResult } from '../core/potential-observable';
 import { createRenderScheduler } from '../core/render-scheduler';
 import { createRenderEventManager } from '../core/render-event/manager';
 
-type PushPipeResult<PO> = PO extends ObservableOrPromise<infer R>
-  ? R | undefined
-  : PO;
+type PushPipeResult<PO> = PotentialObservableResult<PO, undefined>;
 
 /**
- * @ngModule ReactiveComponentModule
+ * @ngModule PushModule
  *
  * @description
  *
@@ -26,6 +17,8 @@ type PushPipeResult<PO> = PO extends ObservableOrPromise<infer R>
  *
  * @usageNotes
  *
+ * ### Displaying Observable Values
+ *
  * ```html
  * <p>{{ number$ | ngrxPush }}</p>
  *
@@ -34,37 +27,38 @@ type PushPipeResult<PO> = PO extends ObservableOrPromise<infer R>
  * <app-number [number]="number$ | ngrxPush"></app-number>
  * ```
  *
+ * ### Combining Multiple Observables
+ *
+ * ```html
+ * <code>
+ *   {{ { users: users$, query: query$ } | ngrxPush | json }}
+ * </code>
+ * ```
+ *
  * @publicApi
  */
 @Pipe({ name: 'ngrxPush', pure: false })
 export class PushPipe implements PipeTransform, OnDestroy {
   private renderedValue: unknown;
-  private readonly renderScheduler = createRenderScheduler({
-    ngZone: this.ngZone,
-    cdRef: this.cdRef,
-  });
+  private readonly renderScheduler = createRenderScheduler();
   private readonly renderEventManager = createRenderEventManager({
-    reset: () => this.setRenderedValue(undefined),
-    next: (event) => this.setRenderedValue(event.value),
+    suspense: (event) => this.setRenderedValue(undefined, event.synchronous),
+    next: (event) => this.setRenderedValue(event.value, event.synchronous),
     error: (event) => {
       if (event.reset) {
-        this.setRenderedValue(undefined);
+        this.setRenderedValue(undefined, event.synchronous);
       }
       this.errorHandler.handleError(event.error);
     },
     complete: (event) => {
       if (event.reset) {
-        this.setRenderedValue(undefined);
+        this.setRenderedValue(undefined, event.synchronous);
       }
     },
   });
   private readonly subscription: Unsubscribable;
 
-  constructor(
-    private readonly cdRef: ChangeDetectorRef,
-    private readonly ngZone: NgZone,
-    private readonly errorHandler: ErrorHandler
-  ) {
+  constructor(private readonly errorHandler: ErrorHandler) {
     this.subscription = this.renderEventManager
       .handlePotentialObservableChanges()
       .subscribe();
@@ -79,10 +73,13 @@ export class PushPipe implements PipeTransform, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  private setRenderedValue(value: unknown): void {
+  private setRenderedValue(value: unknown, isSyncEvent: boolean): void {
     if (value !== this.renderedValue) {
       this.renderedValue = value;
-      this.renderScheduler.schedule();
+
+      if (!isSyncEvent) {
+        this.renderScheduler.schedule();
+      }
     }
   }
 }

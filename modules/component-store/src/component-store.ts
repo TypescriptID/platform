@@ -9,16 +9,20 @@ import {
   Subject,
   queueScheduler,
   scheduled,
-  asyncScheduler,
+  asapScheduler,
+  EMPTY,
+  ObservedValueOf,
 } from 'rxjs';
 import {
-  concatMap,
   takeUntil,
   withLatestFrom,
   map,
   distinctUntilChanged,
   shareReplay,
   take,
+  tap,
+  catchError,
+  observeOn,
 } from 'rxjs/operators';
 import { debounceSync } from './debounce-sync';
 import {
@@ -58,9 +62,6 @@ export class ComponentStore<T extends object> implements OnDestroy {
 
   private readonly stateSubject$ = new ReplaySubject<T>(1);
   private isInitialized = false;
-  private notInitializedErrorMessage =
-    `${this.constructor.name} has not been initialized yet. ` +
-    `Please make sure it is initialized before updating/getting.`;
   // Needs to be after destroy$ is declared because it's used in select.
   readonly state$: Observable<T> = this.select((s) => s);
   private ɵhasProvider = false;
@@ -110,7 +111,10 @@ export class ComponentStore<T extends object> implements OnDestroy {
     return ((
       observableOrValue?: OriginType | Observable<OriginType>
     ): Subscription => {
-      let initializationError: Error | undefined;
+      // We need to explicitly throw an error if a synchronous error occurs.
+      // This is necessary to make synchronous errors catchable.
+      let isSyncUpdate = true;
+      let syncError: unknown;
       // We can receive either the value or an observable. In case it's a
       // simple value, we'll wrap it with `of` operator to turn it into
       // Observable.
@@ -119,32 +123,31 @@ export class ComponentStore<T extends object> implements OnDestroy {
         : of(observableOrValue);
       const subscription = observable$
         .pipe(
-          concatMap((value) =>
-            this.isInitialized
-              ? // Push the value into queueScheduler
-                scheduled([value], queueScheduler).pipe(
-                  withLatestFrom(this.stateSubject$)
-                )
-              : // If state was not initialized, we'll throw an error.
-                throwError(() => new Error(this.notInitializedErrorMessage))
-          ),
+          // Push the value into queueScheduler
+          observeOn(queueScheduler),
+          // If the state is not initialized yet, we'll throw an error.
+          tap(() => this.assertStateIsInitialized()),
+          withLatestFrom(this.stateSubject$),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          map(([value, currentState]) => updaterFn(currentState, value!)),
+          tap((newState) => this.stateSubject$.next(newState)),
+          catchError((error: unknown) => {
+            if (isSyncUpdate) {
+              syncError = error;
+              return EMPTY;
+            }
+
+            return throwError(() => error);
+          }),
           takeUntil(this.destroy$)
         )
-        .subscribe({
-          next: ([value, currentState]) => {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            this.stateSubject$.next(updaterFn(currentState, value!));
-          },
-          error: (error: Error) => {
-            initializationError = error;
-            this.stateSubject$.error(error);
-          },
-        });
+        .subscribe();
 
-      if (initializationError) {
-        // prettier-ignore
-        throw /** @type {!Error} */ (initializationError);
+      if (syncError) {
+        throw syncError;
       }
+      isSyncUpdate = false;
+
       return subscription;
     }) as unknown as ReturnType;
   }
@@ -200,9 +203,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
   protected get(): T;
   protected get<R>(projector: (s: T) => R): R;
   protected get<R>(projector?: (s: T) => R): R | T {
-    if (!this.isInitialized) {
-      throw new Error(this.notInitializedErrorMessage);
-    }
+    this.assertStateIsInitialized();
     let value: R | T;
 
     this.stateSubject$.pipe(take(1)).subscribe((state) => {
@@ -225,43 +226,53 @@ export class ComponentStore<T extends object> implements OnDestroy {
     projector: (s: T) => Result,
     config?: SelectConfig
   ): Observable<Result>;
+  select<SelectorsObject extends Record<string, Observable<unknown>>>(
+    selectorsObject: SelectorsObject,
+    config?: SelectConfig
+  ): Observable<{
+    [K in keyof SelectorsObject]: ObservedValueOf<SelectorsObject[K]>;
+  }>;
   select<Selectors extends Observable<unknown>[], Result>(
-    ...args: [...selectors: Selectors, projector: Projector<Selectors, Result>]
+    ...selectorsWithProjector: [
+      ...selectors: Selectors,
+      projector: Projector<Selectors, Result>
+    ]
   ): Observable<Result>;
   select<Selectors extends Observable<unknown>[], Result>(
-    ...args: [
+    ...selectorsWithProjectorAndConfig: [
       ...selectors: Selectors,
       projector: Projector<Selectors, Result>,
       config: SelectConfig
     ]
   ): Observable<Result>;
   select<
-    Selectors extends Array<Observable<unknown> | SelectConfig | ProjectorFn>,
+    Selectors extends Array<
+      Observable<unknown> | SelectConfig | ProjectorFn | SelectorsObject
+    >,
     Result,
-    ProjectorFn = (...a: unknown[]) => Result
+    ProjectorFn extends (...a: unknown[]) => Result,
+    SelectorsObject extends Record<string, Observable<unknown>>
   >(...args: Selectors): Observable<Result> {
-    const { observables, projector, config } = processSelectorArgs<
-      Selectors,
-      Result
-    >(args);
-
-    let observable$: Observable<Result>;
-    // If there are no Observables to combine, then we'll just map the value.
-    if (observables.length === 0) {
-      observable$ = this.stateSubject$.pipe(
-        config.debounce ? debounceSync() : (source$) => source$,
-        map((state) => projector(state))
+    const { observablesOrSelectorsObject, projector, config } =
+      processSelectorArgs<Selectors, Result, ProjectorFn, SelectorsObject>(
+        args
       );
-    } else {
-      // If there are multiple arguments, then we're aggregating selectors, so we need
-      // to take the combineLatest of them before calling the map function.
-      observable$ = combineLatest(observables).pipe(
-        config.debounce ? debounceSync() : (source$) => source$,
-        map((projectorArgs) => projector(...projectorArgs))
-      );
-    }
 
-    return observable$.pipe(
+    const source$ = hasProjectFnOnly(observablesOrSelectorsObject, projector)
+      ? this.stateSubject$
+      : combineLatest(observablesOrSelectorsObject as any);
+
+    return source$.pipe(
+      config.debounce ? debounceSync() : noopOperator(),
+      (projector
+        ? map((projectorArgs) =>
+            // projectorArgs could be an Array in case where the entire state is an Array, so adding this check
+            observablesOrSelectorsObject.length > 0 &&
+            Array.isArray(projectorArgs)
+              ? projector(...projectorArgs)
+              : projector(projectorArgs)
+          )
+        : noopOperator()) as () => Observable<Result>,
       distinctUntilChanged(),
       shareReplay({
         refCount: true,
@@ -289,9 +300,11 @@ export class ComponentStore<T extends object> implements OnDestroy {
       | unknown = Observable<ProvidedType>,
     // Unwrapped actual type of the origin$ Observable, after default was applied
     ObservableType = OriginType extends Observable<infer A> ? A : never,
-    // Return either an empty callback or a function requiring specific types as inputs
+    // Return either an optional callback or a function requiring specific types as inputs
     ReturnType = ProvidedType | ObservableType extends void
-      ? () => void
+      ? (
+          observableOrValue?: ObservableType | Observable<ObservableType>
+        ) => Subscription
       : (
           observableOrValue: ObservableType | Observable<ObservableType>
         ) => Subscription
@@ -320,7 +333,7 @@ export class ComponentStore<T extends object> implements OnDestroy {
    * but not used with provideComponentStore()
    */
   private checkProviderForHooks() {
-    asyncScheduler.schedule(() => {
+    asapScheduler.schedule(() => {
       if (
         isDevMode() &&
         (isOnStoreInitDefined(this) || isOnStateInitDefined(this)) &&
@@ -342,39 +355,82 @@ export class ComponentStore<T extends object> implements OnDestroy {
       }
     });
   }
+
+  private assertStateIsInitialized(): void {
+    if (!this.isInitialized) {
+      throw new Error(
+        `${this.constructor.name} has not been initialized yet. ` +
+          `Please make sure it is initialized before updating/getting.`
+      );
+    }
+  }
 }
 
 function processSelectorArgs<
-  Selectors extends Array<Observable<unknown> | SelectConfig | ProjectorFn>,
+  Selectors extends Array<
+    Observable<unknown> | SelectConfig | ProjectorFn | SelectorsObject
+  >,
   Result,
-  ProjectorFn = (...a: unknown[]) => Result
+  ProjectorFn extends (...a: unknown[]) => Result,
+  SelectorsObject extends Record<string, Observable<unknown>>
 >(
   args: Selectors
-): {
-  observables: Observable<unknown>[];
-  projector: ProjectorFn;
-  config: Required<SelectConfig>;
-} {
+):
+  | {
+      observablesOrSelectorsObject: Observable<unknown>[];
+      projector: ProjectorFn;
+      config: Required<SelectConfig>;
+    }
+  | {
+      observablesOrSelectorsObject: SelectorsObject;
+      projector: undefined;
+      config: Required<SelectConfig>;
+    } {
   const selectorArgs = Array.from(args);
   // Assign default values.
   let config: Required<SelectConfig> = { debounce: false };
-  let projector: ProjectorFn;
-  // Last argument is either projector or config
-  const projectorOrConfig = selectorArgs.pop() as ProjectorFn | SelectConfig;
 
-  if (typeof projectorOrConfig !== 'function') {
-    // We got the config as the last argument, replace any default values with it.
-    config = { ...config, ...projectorOrConfig };
-    // Pop the next args, which would be the projector fn.
-    projector = selectorArgs.pop() as ProjectorFn;
-  } else {
-    projector = projectorOrConfig;
+  // Last argument is either config or projector or selectorsObject
+  if (isSelectConfig(selectorArgs[selectorArgs.length - 1])) {
+    config = { ...config, ...selectorArgs.pop() };
   }
-  // The Observables to combine, if there are any.
+
+  // At this point selectorArgs is either projector, selectors with projector or selectorsObject
+  if (selectorArgs.length === 1 && typeof selectorArgs[0] !== 'function') {
+    // this is a selectorsObject
+    return {
+      observablesOrSelectorsObject: selectorArgs[0] as SelectorsObject,
+      projector: undefined,
+      config,
+    };
+  }
+
+  const projector = selectorArgs.pop() as ProjectorFn;
+
+  // The Observables to combine, if there are any left.
   const observables = selectorArgs as Observable<unknown>[];
   return {
-    observables,
+    observablesOrSelectorsObject: observables,
     projector,
     config,
   };
+}
+
+function isSelectConfig(arg: SelectConfig | unknown): arg is SelectConfig {
+  return typeof (arg as SelectConfig).debounce !== 'undefined';
+}
+
+function hasProjectFnOnly(
+  observablesOrSelectorsObject: unknown[] | Record<string, unknown>,
+  projector: unknown
+) {
+  return (
+    Array.isArray(observablesOrSelectorsObject) &&
+    observablesOrSelectorsObject.length === 0 &&
+    projector
+  );
+}
+
+function noopOperator(): <T>(source$: Observable<T>) => typeof source$ {
+  return (source$) => source$;
 }

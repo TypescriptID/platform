@@ -1,24 +1,24 @@
 import { TestBed } from '@angular/core/testing';
-import { Router, RouterEvent, NavigationEnd } from '@angular/router';
+import { NavigationEnd, Router, RouterEvent } from '@angular/router';
 import {
+  FullRouterStateSerializer,
+  MinimalRouterStateSerializer,
+  RouterAction,
   routerReducer,
   RouterReducerState,
-  StoreRouterConnectingModule,
-  RouterAction,
   RouterState,
   RouterStateSerializer,
-  MinimalRouterStateSerializer,
-  DefaultRouterStateSerializer,
 } from '@ngrx/router-store';
-import { select, Store, ActionsSubject } from '@ngrx/store';
-import { withLatestFrom, filter, skip } from 'rxjs/operators';
+import { ActionsSubject, select, Store } from '@ngrx/store';
+import { filter, withLatestFrom } from 'rxjs/operators';
 
 import { createTestModule } from './utils';
+import { StoreRouterConnectingService } from '../src/store_router_connecting.service';
 
 describe('Router Store Module', () => {
   describe('with defining state key', () => {
     const customStateKey = 'router-reducer';
-    let storeRouterConnectingModule: StoreRouterConnectingModule;
+    let storeRouterConnectingService: StoreRouterConnectingService;
     let store: Store<State>;
     let router: Router;
 
@@ -38,11 +38,13 @@ describe('Router Store Module', () => {
 
       store = TestBed.inject(Store);
       router = TestBed.inject(Router);
-      storeRouterConnectingModule = TestBed.inject(StoreRouterConnectingModule);
+      storeRouterConnectingService = TestBed.inject(
+        StoreRouterConnectingService
+      );
     });
 
     it('should have custom state key as own property', () => {
-      expect((<any>storeRouterConnectingModule).stateKey).toBe(customStateKey);
+      expect((<any>storeRouterConnectingService).stateKey).toBe(customStateKey);
     });
 
     it('should call navigateIfNeeded with args selected by custom state key', (done: any) => {
@@ -54,7 +56,7 @@ describe('Router Store Module', () => {
         });
 
       spyOn(
-        storeRouterConnectingModule,
+        storeRouterConnectingService,
         'navigateIfNeeded' as never
       ).and.callThrough();
       logs = [];
@@ -63,7 +65,7 @@ describe('Router Store Module', () => {
       // and store emits its payload.
       router.navigateByUrl('/').then(() => {
         const actual = (<any>(
-          storeRouterConnectingModule
+          storeRouterConnectingService
         )).navigateIfNeeded.calls.allArgs();
 
         expect(actual.length).toBe(1);
@@ -77,7 +79,7 @@ describe('Router Store Module', () => {
     const customStateKey = 'routerReducer';
     const customStateSelector = (state: State) => state.routerReducer;
 
-    let storeRouterConnectingModule: StoreRouterConnectingModule;
+    let storeRouterConnectingService: StoreRouterConnectingService;
     let store: Store<State>;
     let router: Router;
 
@@ -97,11 +99,13 @@ describe('Router Store Module', () => {
 
       store = TestBed.inject(Store);
       router = TestBed.inject(Router);
-      storeRouterConnectingModule = TestBed.inject(StoreRouterConnectingModule);
+      storeRouterConnectingService = TestBed.inject(
+        StoreRouterConnectingService
+      );
     });
 
     it('should have same state selector as own property', () => {
-      expect((<any>storeRouterConnectingModule).stateKey).toBe(
+      expect((<any>storeRouterConnectingService).stateKey).toBe(
         customStateSelector
       );
     });
@@ -115,7 +119,7 @@ describe('Router Store Module', () => {
         });
 
       spyOn(
-        storeRouterConnectingModule,
+        storeRouterConnectingService,
         'navigateIfNeeded' as never
       ).and.callThrough();
       logs = [];
@@ -124,7 +128,7 @@ describe('Router Store Module', () => {
       // and store emits its payload.
       router.navigateByUrl('/').then(() => {
         const actual = (<any>(
-          storeRouterConnectingModule
+          storeRouterConnectingService
         )).navigateIfNeeded.calls.allArgs();
 
         expect(actual.length).toBe(1);
@@ -165,27 +169,27 @@ describe('Router Store Module', () => {
         router.navigateByUrl('/');
       });
 
-      it('should use the minimal router serializer by default', () => {
+      it('should use the default router serializer by default', () => {
         const { serializer } = setup();
         expect(serializer).toEqual(new MinimalRouterStateSerializer());
       });
 
-      it('should use the minimal router serializer if minimal state option is passed in', () => {
+      it('should use the default router serializer if minimal state option is passed in', () => {
         const { serializer } = setup(RouterState.Minimal);
         expect(serializer).toEqual(new MinimalRouterStateSerializer());
       });
 
-      it('should use the default router serializer if full state option is passed in', () => {
+      it('should use the full router serializer if full state option is passed in', () => {
         const { serializer } = setup(RouterState.Full);
-        expect(serializer).toEqual(new DefaultRouterStateSerializer());
+        expect(serializer).toEqual(new FullRouterStateSerializer());
       });
 
       it('should use the provided serializer if one is provided', () => {
         const { serializer } = setup(
           RouterState.Full,
-          MinimalRouterStateSerializer
+          FullRouterStateSerializer
         );
-        expect(serializer).toEqual(new MinimalRouterStateSerializer());
+        expect(serializer).toEqual(new FullRouterStateSerializer());
       });
     });
 
@@ -229,15 +233,15 @@ describe('Router Store Module', () => {
 
       it('should use the minimal router serializer', () => {
         const { serializer } = setup(RouterState.Minimal);
-        expect(serializer).toEqual(new MinimalRouterStateSerializer());
+        expect(serializer).toEqual(new FullRouterStateSerializer());
       });
 
       it('should use the provided serializer if one is provided', () => {
         const { serializer } = setup(
           RouterState.Minimal,
-          DefaultRouterStateSerializer
+          MinimalRouterStateSerializer
         );
-        expect(serializer).toEqual(new DefaultRouterStateSerializer());
+        expect(serializer).toEqual(new MinimalRouterStateSerializer());
       });
     });
   });

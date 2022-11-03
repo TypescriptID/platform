@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "module": "commonjs",
-    "types": ["jest", "node"]
+    "types": []
+  },
+  "angularCompilerOptions": {
+    "strictTemplates": true,
+    "strictInjectionParameters": true,
+    "strictInputAccessModifiers": true
   },
   "files": ["src/main.ts", "src/polyfills.ts"],
   "include": ["src/**/*.d.ts"],

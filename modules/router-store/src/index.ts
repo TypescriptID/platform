@@ -22,26 +22,27 @@ export {
   routerRequestAction,
 } from './actions';
 export { routerReducer, RouterReducerState } from './reducer';
+export { StoreRouterConnectingModule } from './router_store_module';
 export {
   StateKeyOrSelector,
-  StoreRouterConnectingModule,
   StoreRouterConfig,
   NavigationActionTiming,
   ROUTER_CONFIG,
   DEFAULT_ROUTER_FEATURENAME,
   RouterState,
-} from './router_store_module';
+} from './router_store_config';
 export {
   RouterStateSerializer,
   BaseRouterStoreState,
 } from './serializers/base';
 export {
-  DefaultRouterStateSerializer,
+  FullRouterStateSerializer,
   SerializedRouterStateSnapshot,
-} from './serializers/default_serializer';
+} from './serializers/full_serializer';
 export {
   MinimalActivatedRouteSnapshot,
   MinimalRouterStateSnapshot,
   MinimalRouterStateSerializer,
 } from './serializers/minimal_serializer';
 export { getSelectors, createRouterSelector } from './router_selectors';
+export { provideRouterStore } from './provide_router_store';

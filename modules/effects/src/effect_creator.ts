@@ -71,9 +71,9 @@ export function createEffect<
   return effect as typeof effect & CreateEffectMetadata;
 }
 
-export function getCreateEffectMetadata<
-  T extends { [props in keyof T]: Object }
->(instance: T): EffectMetadata<T>[] {
+export function getCreateEffectMetadata<T extends Record<keyof T, Object>>(
+  instance: T
+): EffectMetadata<T>[] {
   const propertyNames = Object.getOwnPropertyNames(instance) as Array<keyof T>;
 
   const metadata: EffectMetadata<T>[] = propertyNames
@@ -83,7 +83,7 @@ export function getCreateEffectMetadata<
         instance[propertyName].hasOwnProperty(CREATE_EFFECT_METADATA_KEY)
       ) {
         // If the property type has overridden `hasOwnProperty` we need to ensure
-        // that the metadata is valid (containing a `dispatch`property)
+        // that the metadata is valid (containing a `dispatch` property)
         // https://github.com/ngrx/platform/issues/2975
         const property = instance[propertyName] as any;
         return property[CREATE_EFFECT_METADATA_KEY].hasOwnProperty('dispatch');

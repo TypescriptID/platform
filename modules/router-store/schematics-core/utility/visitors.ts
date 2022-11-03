@@ -166,15 +166,13 @@ export function visitDecorator(
     }
 
     const classDeclarationNode = node as ts.ClassDeclaration;
+    const decorators = ts.getDecorators(classDeclarationNode);
 
-    if (
-      !classDeclarationNode.decorators ||
-      !classDeclarationNode.decorators.length
-    ) {
+    if (!decorators || !decorators.length) {
       return;
     }
 
-    const componentDecorator = classDeclarationNode.decorators.find((d) => {
+    const componentDecorator = decorators.find((d) => {
       return (
         ts.isCallExpression(d.expression) &&
         ts.isIdentifier(d.expression.expression) &&

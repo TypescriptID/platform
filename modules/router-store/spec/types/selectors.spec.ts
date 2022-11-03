@@ -24,6 +24,7 @@ describe('router selectors', () => {
         selectRouteParam,
         selectRouteData,
         selectUrl,
+        selectTitle,
       } = fromRouter.getSelectors(selectRouter);
 
       ${code}
@@ -37,10 +38,7 @@ describe('router selectors', () => {
         selectCurrentRoute,
         route => route
       );
-    `).toInfer(
-      'selector',
-      'MemoizedSelector<State, any, DefaultProjectorFn<any>>'
-    );
+    `).toInfer('selector', 'MemoizedSelector<State, any, (s1: any) => any>');
   });
 
   it('selectQueryParams should return Params', () => {
@@ -51,7 +49,7 @@ describe('router selectors', () => {
       );
     `).toInfer(
       'selector',
-      'MemoizedSelector<State, Params, DefaultProjectorFn<Params>>'
+      'MemoizedSelector<State, Params, (s1: Params) => Params>'
     );
   });
 
@@ -64,7 +62,7 @@ describe('router selectors', () => {
       );
     `).toInfer(
       'selector',
-      'MemoizedSelector<State, string, DefaultProjectorFn<string>>'
+      'MemoizedSelector<State, string, (s1: string) => string>'
     );
   });
 
@@ -76,7 +74,7 @@ describe('router selectors', () => {
       );
     `).toInfer(
       'selector',
-      'MemoizedSelector<State, Params, DefaultProjectorFn<Params>>'
+      'MemoizedSelector<State, Params, (s1: Params) => Params>'
     );
   });
 
@@ -89,7 +87,7 @@ describe('router selectors', () => {
       );
     `).toInfer(
       'selector',
-      'MemoizedSelector<State, string, DefaultProjectorFn<string>>'
+      'MemoizedSelector<State, string, (s1: string) => string>'
     );
   });
 
@@ -99,10 +97,7 @@ describe('router selectors', () => {
         selectRouteData,
         data => data
       );
-    `).toInfer(
-      'selector',
-      'MemoizedSelector<State, Data, DefaultProjectorFn<Data>>'
-    );
+    `).toInfer('selector', 'MemoizedSelector<State, Data, (s1: Data) => Data>');
   });
 
   it('selectUrl should return string', () => {
@@ -113,7 +108,19 @@ describe('router selectors', () => {
       );
     `).toInfer(
       'selector',
-      'MemoizedSelector<State, string, DefaultProjectorFn<string>>'
+      'MemoizedSelector<State, string, (s1: string) => string>'
+    );
+  });
+
+  it('selectTitle should return string', () => {
+    expectSnippet(`
+      export const selector = createSelector(
+        selectTitle,
+        url => url
+      );
+    `).toInfer(
+      'selector',
+      'MemoizedSelector<State, string, (s1: string) => string>'
     );
   });
 });

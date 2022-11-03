@@ -1,10 +1,18 @@
 interface BaseRenderEvent {
+  /**
+   * true if the event is emitted by a new source
+   */
   reset: boolean;
+  /**
+   * true if the synchronous event is emitted
+   */
+  synchronous: boolean;
 }
 
-export interface ResetRenderEvent extends BaseRenderEvent {
-  type: 'reset';
+export interface SuspenseRenderEvent extends BaseRenderEvent {
+  type: 'suspense';
   reset: true;
+  synchronous: true;
 }
 
 export interface NextRenderEvent<T> extends BaseRenderEvent {
@@ -22,7 +30,7 @@ export interface CompleteRenderEvent extends BaseRenderEvent {
 }
 
 export type RenderEvent<T> =
-  | ResetRenderEvent
+  | SuspenseRenderEvent
   | NextRenderEvent<T>
   | ErrorRenderEvent
   | CompleteRenderEvent;

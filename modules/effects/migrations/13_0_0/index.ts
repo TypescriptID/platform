@@ -15,13 +15,10 @@ export function migrateToCreators(): Rule {
       const effectsPerClass = sourceFile.statements
         .filter(ts.isClassDeclaration)
         .map((clas) =>
-          clas.members
-            .filter(ts.isPropertyDeclaration)
-            .filter(
-              (property) =>
-                property.decorators &&
-                property.decorators.some(isEffectDecorator)
-            )
+          clas.members.filter(ts.isPropertyDeclaration).filter((property) => {
+            const decorators = ts.getDecorators(property);
+            return decorators && decorators.some(isEffectDecorator);
+          })
         );
 
       const effects = effectsPerClass.reduce(
@@ -60,7 +57,9 @@ function replaceEffectDecorators(
       if (!effect.initializer) {
         return [];
       }
-      const decorator = (effect.decorators || []).find(isEffectDecorator);
+      const decorator = (ts.getDecorators(effect) || []).find(
+        isEffectDecorator
+      );
       if (!decorator) {
         return [];
       }
@@ -86,7 +85,7 @@ function replaceEffectDecorators(
     .reduce((acc, inserts) => acc.concat(inserts), []);
 
   const removes = effects
-    .map((effect) => effect.decorators)
+    .map((effect) => ts.getDecorators(effect))
     .map((decorators) => {
       if (!decorators) {
         return [];

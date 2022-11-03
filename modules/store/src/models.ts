@@ -1,3 +1,5 @@
+import { ImportedNgModuleProviders } from '@angular/core';
+
 export interface Action {
   type: string;
 }

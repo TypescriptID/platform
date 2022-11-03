@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
+import { LetModule } from './let/let.module';
+import { PushModule } from './push/push.module';
 
-import { LetDirective } from './let/let.directive';
-import { PushPipe } from './push/push.pipe';
-
-const DECLARATIONS = [LetDirective, PushPipe];
-const EXPORTS = [DECLARATIONS];
-
+/**
+ * @deprecated `ReactiveComponentModule` is deprecated in favor of `LetModule` and `PushModule`.
+ * See the {@link https://ngrx.io/guide/migration/v14#reactivecomponentmodule migration guide}
+ * for more information.
+ */
 @NgModule({
-  declarations: [DECLARATIONS],
-  exports: [EXPORTS],
+  exports: [LetModule, PushModule],
 })
 export class ReactiveComponentModule {}

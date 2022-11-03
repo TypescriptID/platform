@@ -4,15 +4,16 @@ import {
 } from '@angular-devkit/schematics/testing';
 import * as path from 'path';
 import { createWorkspace } from '@ngrx/schematics-core/testing';
-import { Schema as SchematicOptions } from './schema';
 
 describe('ng-add Schematic', () => {
   const schematicRunner = new SchematicTestRunner(
     '@ngrx/schematics',
     path.join(__dirname, '../../collection.json')
   );
-  const defaultOptions: SchematicOptions = {
-    defaultCollection: true,
+
+  const defaultWorkspace = {
+    version: 1,
+    projects: {},
   };
 
   let appTree: UnitTestTree;
@@ -21,29 +22,62 @@ describe('ng-add Schematic', () => {
     appTree = await createWorkspace(schematicRunner, appTree);
   });
 
-  it(`should leave the workspace's cli as default`, async () => {
-    const options: SchematicOptions = {
-      ...defaultOptions,
-      defaultCollection: false,
-    };
+  it('should add @ngrx/schematics into schematicCollections ', async () => {
+    appTree.overwrite(
+      '/angular.json',
+      JSON.stringify(
+        {
+          ...defaultWorkspace,
+          cli: { schematicCollections: ['existingCollection'] },
+        },
+        undefined,
+        2
+      )
+    );
 
     const tree = await schematicRunner
-      .runSchematicAsync('ng-add', options, appTree)
+      .runSchematicAsync('ng-add', {}, appTree)
       .toPromise();
     const workspace = JSON.parse(tree.readContent('/angular.json'));
-    expect(workspace.cli).not.toBeDefined();
+    expect(workspace.cli.schematicCollections).toEqual([
+      'existingCollection',
+      '@ngrx/schematics',
+    ]);
   });
 
-  it('should set workspace default cli to @ngrx/schematics', async () => {
-    const options: SchematicOptions = {
-      ...defaultOptions,
-      defaultCollection: true,
-    };
+  it('should create schematicCollections is not defined', async () => {
+    appTree.overwrite(
+      '/angular.json',
+      JSON.stringify(defaultWorkspace, undefined, 2)
+    );
 
     const tree = await schematicRunner
-      .runSchematicAsync('ng-add', options, appTree)
+      .runSchematicAsync('ng-add', {}, appTree)
       .toPromise();
     const workspace = JSON.parse(tree.readContent('/angular.json'));
-    expect(workspace.cli.defaultCollection).toEqual('@ngrx/schematics');
+    expect(workspace.cli.schematicCollections).toEqual(['@ngrx/schematics']);
+  });
+
+  it('should create schematicCollections is not defined using the original defaultCollection ', async () => {
+    appTree.overwrite(
+      '/angular.json',
+      JSON.stringify(
+        {
+          ...defaultWorkspace,
+          cli: { defaultCollection: 'existingCollection' },
+        },
+        undefined,
+        2
+      )
+    );
+
+    const tree = await schematicRunner
+      .runSchematicAsync('ng-add', {}, appTree)
+      .toPromise();
+    const workspace = JSON.parse(tree.readContent('/angular.json'));
+    expect(workspace.cli.schematicCollections).toEqual([
+      'existingCollection',
+      '@ngrx/schematics',
+    ]);
   });
 });
