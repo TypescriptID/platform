@@ -1,12 +1,17 @@
 import { TestBed } from '@angular/core/testing';
 
-import { HttpClient } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpContext,
+  HttpContextToken,
+  HttpParams,
+} from '@angular/common/http';
 import {
   HttpClientTestingModule,
   HttpTestingController,
 } from '@angular/common/http/testing';
 
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 
 import { Update } from '@ngrx/entity';
 
@@ -17,12 +22,44 @@ import {
   HttpUrlGenerator,
   DefaultDataServiceConfig,
   DataServiceError,
+  HttpMethods,
+  QueryParams,
 } from '../../';
+import { HttpOptions } from '../../src/dataservices/interfaces';
 
 class Hero {
   id!: number;
   name!: string;
   version?: number;
+}
+
+export const IS_CACHE_ENABLED = new HttpContextToken<boolean>(() => false);
+/**
+ * This is to test that we don't inadvertently delete http options when users override methods on DefaultDataService.
+ */
+class CustomDataService<T> extends DefaultDataService<T> {
+  override getWithQuery(
+    queryParams: QueryParams | string | undefined,
+    options?: HttpOptions
+  ): Observable<T[]> {
+    const qParams =
+      typeof queryParams === 'string'
+        ? { fromString: queryParams }
+        : { fromObject: queryParams };
+    const params = new HttpParams(qParams);
+
+    return this.execute(
+      'GET',
+      this.entitiesUrl,
+      undefined,
+      {
+        params,
+        observe: 'body',
+        context: new HttpContext().set(IS_CACHE_ENABLED, true),
+      },
+      options
+    );
+  }
 }
 
 ////////  Tests  /////////////
@@ -33,6 +70,7 @@ describe('DefaultDataService', () => {
   const heroesUrl = 'api/heroes/';
   let httpUrlGenerator: HttpUrlGenerator;
   let service: DefaultDataService<Hero>;
+  let customService: CustomDataService<Hero>;
 
   //// HttpClient testing boilerplate
   beforeEach(() => {
@@ -51,6 +89,11 @@ describe('DefaultDataService', () => {
     });
 
     service = new DefaultDataService('Hero', httpClient, httpUrlGenerator);
+    customService = new CustomDataService<Hero>(
+      'Hero',
+      httpClient,
+      httpUrlGenerator
+    );
   });
 
   afterEach(() => {
@@ -259,6 +302,88 @@ describe('DefaultDataService', () => {
       // from expected URL with query params
       const req = httpTestingController.expectOne(heroesUrl + '?name=B');
       expect(req.request.method).toEqual('GET');
+
+      // Respond with the mock heroes
+      req.flush(expectedHeroes);
+    });
+
+    it('should return expected selected heroes w/ string params and a custom header', (done) => {
+      const httpOptions: HttpOptions = {
+        httpHeaders: { MyHeader: 'MyHeaderValue' },
+      } as HttpOptions;
+      service.getWithQuery('name=B', httpOptions).subscribe((heroes) => {
+        expect(heroes).toEqual(expectedHeroes);
+        done();
+      }, fail);
+
+      // HeroService should have made one request to GET heroes
+      // from expected URL with query params
+      const req = httpTestingController.expectOne(heroesUrl + '?name=B');
+      expect(req.request.method).toEqual('GET');
+      expect(req.request.headers.has('MyHeader')).toEqual(true);
+      expect(req.request.headers.get('MyHeader')).toEqual('MyHeaderValue');
+
+      // Respond with the mock heroes
+      req.flush(expectedHeroes);
+    });
+
+    it('should return expected selected heroes w/ httpOption string params', (done) => {
+      const httpOptions: HttpOptions = {
+        httpParams: { fromString: 'name=B' },
+      } as HttpOptions;
+
+      service.getWithQuery(undefined, httpOptions).subscribe((heroes) => {
+        expect(heroes).toEqual(expectedHeroes);
+        done();
+      }, fail);
+
+      // HeroService should have made one request to GET heroes
+      // from expected URL with query params
+      const req = httpTestingController.expectOne(heroesUrl + '?name=B');
+      expect(req.request.method).toEqual('GET');
+
+      // Respond with the mock heroes
+      req.flush(expectedHeroes);
+    });
+
+    it('should return expected selected heroes w/ httpOption option params', (done) => {
+      const httpOptions: HttpOptions = {
+        httpParams: {
+          fromObject: {
+            name: 'B',
+          },
+        },
+      } as HttpOptions;
+
+      service.getWithQuery(undefined, httpOptions).subscribe((heroes) => {
+        expect(heroes).toEqual(expectedHeroes);
+        done();
+      }, fail);
+
+      // HeroService should have made one request to GET heroes
+      // from expected URL with query params
+      const req = httpTestingController.expectOne(heroesUrl + '?name=B');
+      expect(req.request.method).toEqual('GET');
+
+      // Respond with the mock heroes
+      req.flush(expectedHeroes);
+    });
+
+    it('should support custom data services that provide their own http options to execute', (done) => {
+      const httpOptions: HttpOptions = {
+        httpParams: { fromString: 'name=B' },
+      } as HttpOptions;
+
+      customService.getWithQuery(undefined, httpOptions).subscribe((heroes) => {
+        expect(heroes).toEqual(expectedHeroes);
+        done();
+      }, fail);
+
+      // HeroService should have made one request to GET heroes
+      // from expected URL with query params
+      const req = httpTestingController.expectOne(heroesUrl + '?name=B');
+      expect(req.request.method).toEqual('GET');
+      expect(req.request.context.get(IS_CACHE_ENABLED)).toEqual(true);
 
       // Respond with the mock heroes
       req.flush(expectedHeroes);

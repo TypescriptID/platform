@@ -1,3 +1,56 @@
+<a name="15.4.0"></a>
+
+# [15.4.0](https://github.com/ngrx/platform/compare/15.3.0...15.4.0) (2023-03-16)
+
+### Bug Fixes
+
+- **data:** correctly handle HttpOptions when provided ([#3795](https://github.com/ngrx/platform/issues/3795)) ([cbdf524](https://github.com/ngrx/platform/commit/cbdf524)), closes [#3794](https://github.com/ngrx/platform/issues/3794)
+- **eslint-plugin:** ignore select name within createFeature ([#3788](https://github.com/ngrx/platform/issues/3788)) ([b58f9a3](https://github.com/ngrx/platform/commit/b58f9a3)), closes [#3786](https://github.com/ngrx/platform/issues/3786)
+
+### Features
+
+- **store:** rename getMockStore to createMockStore ([#3789](https://github.com/ngrx/platform/issues/3789)) ([6d615b3](https://github.com/ngrx/platform/commit/6d615b3)), closes [#3781](https://github.com/ngrx/platform/issues/3781)
+- **store:** use createFeature in feature schematics ([#3776](https://github.com/ngrx/platform/issues/3776)) ([9b3647f](https://github.com/ngrx/platform/commit/9b3647f)), closes [#3741](https://github.com/ngrx/platform/issues/3741)
+
+<a name="15.3.0"></a>
+
+# [15.3.0](https://github.com/ngrx/platform/compare/15.2.1...15.3.0) (2023-02-13)
+
+### Bug Fixes
+
+- **store:** support using factory selectors as extra selectors ([#3767](https://github.com/ngrx/platform/issues/3767)) ([f4714c3](https://github.com/ngrx/platform/commit/f4714c3))
+
+### Features
+
+- **data:** Add HttpOptions to EntityActionOptions ([#3663](https://github.com/ngrx/platform/issues/3663)) ([#3664](https://github.com/ngrx/platform/issues/3664)) ([dd745c0](https://github.com/ngrx/platform/commit/dd745c0))
+
+<a name="15.2.1"></a>
+
+## [15.2.1](https://github.com/ngrx/platform/compare/15.1.0...15.2.1) (2023-01-26)
+
+### Features
+
+- **data:** add loadWithQuery method ([#3717](https://github.com/ngrx/platform/issues/3717)) ([06b97bf](https://github.com/ngrx/platform/commit/06b97bf)), closes [#3088](https://github.com/ngrx/platform/issues/3088)
+- **effects:** add ability to create functional effects ([#3669](https://github.com/ngrx/platform/issues/3669)) ([dd76c63](https://github.com/ngrx/platform/commit/dd76c63)), closes [#3668](https://github.com/ngrx/platform/issues/3668)
+- **router-store:** add migration for getRouterSelectors ([#3753](https://github.com/ngrx/platform/issues/3753)) ([a785331](https://github.com/ngrx/platform/commit/a785331))
+- **router-store:** rename getSelectors to getRouterSelectors ([#3745](https://github.com/ngrx/platform/issues/3745)) ([7ad76b8](https://github.com/ngrx/platform/commit/7ad76b8)), closes [#3738](https://github.com/ngrx/platform/issues/3738)
+- **store:** add ability to create extra selectors with createFeature ([#3744](https://github.com/ngrx/platform/issues/3744)) ([e4f873b](https://github.com/ngrx/platform/commit/e4f873b)), closes [#3719](https://github.com/ngrx/platform/issues/3719)
+- **store:** add createFeature migration ([#3759](https://github.com/ngrx/platform/issues/3759)) ([b3c5931](https://github.com/ngrx/platform/commit/b3c5931))
+- **store:** deprecate createFeature signature with root state ([#3756](https://github.com/ngrx/platform/issues/3756)) ([ccb3b93](https://github.com/ngrx/platform/commit/ccb3b93)), closes [#3737](https://github.com/ngrx/platform/issues/3737)
+
+<a name="15.2.0"></a>
+
+# [15.2.0](https://github.com/ngrx/platform/compare/15.1.0...15.2.0) (2023-01-26)
+
+### Features
+
+- **data:** add loadWithQuery method ([#3717](https://github.com/ngrx/platform/issues/3717)) ([06b97bf](https://github.com/ngrx/platform/commit/06b97bf)), closes [#3088](https://github.com/ngrx/platform/issues/3088)
+- **effects:** add ability to create functional effects ([#3669](https://github.com/ngrx/platform/issues/3669)) ([dd76c63](https://github.com/ngrx/platform/commit/dd76c63)), closes [#3668](https://github.com/ngrx/platform/issues/3668)
+- **router-store:** add migration for getRouterSelectors ([#3753](https://github.com/ngrx/platform/issues/3753)) ([a785331](https://github.com/ngrx/platform/commit/a785331))
+- **router-store:** rename getSelectors to getRouterSelectors ([#3745](https://github.com/ngrx/platform/issues/3745)) ([7ad76b8](https://github.com/ngrx/platform/commit/7ad76b8)), closes [#3738](https://github.com/ngrx/platform/issues/3738)
+- **store:** add ability to create extra selectors with createFeature ([#3744](https://github.com/ngrx/platform/issues/3744)) ([e4f873b](https://github.com/ngrx/platform/commit/e4f873b)), closes [#3719](https://github.com/ngrx/platform/issues/3719)
+- **store:** deprecate createFeature signature with root state ([#3756](https://github.com/ngrx/platform/issues/3756)) ([ccb3b93](https://github.com/ngrx/platform/commit/ccb3b93)), closes [#3737](https://github.com/ngrx/platform/issues/3737)
+
 <a name="15.1.0"></a>
 
 # [15.1.0](https://github.com/ngrx/platform/compare/15.0.0...15.1.0) (2022-12-21)
