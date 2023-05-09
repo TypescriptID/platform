@@ -32,8 +32,12 @@ import {
   InjectionToken,
   Inject,
   isDevMode,
+  Signal,
+  computed,
+  type ValueEqualityFn,
 } from '@angular/core';
 import { isOnStateInitDefined, isOnStoreInitDefined } from './lifecycle_hooks';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 export interface SelectConfig {
   debounce?: boolean;
@@ -53,6 +57,21 @@ export type Projector<Selectors extends Observable<unknown>[], Result> = (
   ...args: SelectorResults<Selectors>
 ) => Result;
 
+type SignalsProjector<Signals extends Signal<unknown>[], Result> = (
+  ...values: {
+    [Key in keyof Signals]: Signals[Key] extends Signal<infer Value>
+      ? Value
+      : never;
+  }
+) => Result;
+
+interface SelectSignalOptions<T> {
+  /**
+   * A comparison function which defines equality for select results.
+   */
+  equal?: ValueEqualityFn<T>;
+}
+
 @Injectable()
 export class ComponentStore<T extends object> implements OnDestroy {
   // Should be used only in ngOnDestroy.
@@ -64,6 +83,10 @@ export class ComponentStore<T extends object> implements OnDestroy {
   private isInitialized = false;
   // Needs to be after destroy$ is declared because it's used in select.
   readonly state$: Observable<T> = this.select((s) => s);
+  readonly state: Signal<T> = toSignal(
+    this.stateSubject$.pipe(takeUntil(this.destroy$)),
+    { requireSync: false, manualCleanup: true }
+  ) as Signal<T>;
   private ɵhasProvider = false;
 
   constructor(@Optional() @Inject(INITIAL_STATE_TOKEN) defaultState?: T) {
@@ -280,6 +303,74 @@ export class ComponentStore<T extends object> implements OnDestroy {
       }),
       takeUntil(this.destroy$)
     );
+  }
+
+  /**
+   * Creates a signal from the provided state projector function.
+   */
+  selectSignal<Result>(
+    projector: (state: T) => Result,
+    options?: SelectSignalOptions<Result>
+  ): Signal<Result>;
+  /**
+   * Creates a signal by combining provided signals.
+   */
+  selectSignal<Signals extends Signal<unknown>[], Result>(
+    ...args: [...signals: Signals, projector: SignalsProjector<Signals, Result>]
+  ): Signal<Result>;
+  /**
+   * Creates a signal by combining provided signals.
+   */
+  selectSignal<Signals extends Signal<unknown>[], Result>(
+    ...args: [
+      ...signals: Signals,
+      projector: SignalsProjector<Signals, Result>,
+      options: SelectSignalOptions<Result>
+    ]
+  ): Signal<Result>;
+  selectSignal(
+    ...args:
+      | [(state: T) => unknown, SelectSignalOptions<unknown>?]
+      | [
+          ...signals: Signal<unknown>[],
+          projector: (...values: unknown[]) => unknown
+        ]
+      | [
+          ...signals: Signal<unknown>[],
+          projector: (...values: unknown[]) => unknown,
+          options: SelectSignalOptions<unknown>
+        ]
+  ): Signal<unknown> {
+    if (args.length === 1) {
+      const projector = args[0] as (state: T) => unknown;
+      return computed(() => projector(this.state()));
+    }
+
+    const optionsOrProjector = args[args.length - 1] as (
+      ...values: unknown[]
+    ) => unknown | SelectSignalOptions<unknown>;
+    if (typeof optionsOrProjector === 'function') {
+      const signals = args.slice(0, -1) as Signal<unknown>[];
+
+      return computed(() => {
+        const values = signals.map((signal) => signal());
+        return optionsOrProjector(...values);
+      });
+    }
+
+    if (args.length === 2) {
+      const projector = args[0] as (state: T) => unknown;
+      return computed(() => projector(this.state()), optionsOrProjector);
+    }
+
+    const signals = args.slice(0, -2) as Signal<unknown>[];
+    const projector = args[args.length - 2] as (
+      ...values: unknown[]
+    ) => unknown;
+    return computed(() => {
+      const values = signals.map((signal) => signal());
+      return projector(...values);
+    }, optionsOrProjector);
   }
 
   /**

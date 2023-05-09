@@ -1381,6 +1381,133 @@ describe('Component Store', () => {
     });
   });
 
+  describe('selectSignal', () => {
+    it('creates a signal from the provided state projector function', () => {
+      const store = new ComponentStore<{ foo: string }>({ foo: 'bar' });
+      let projectorExecutionCount = 0;
+
+      const foo = store.selectSignal((state) => {
+        projectorExecutionCount++;
+        return state.foo;
+      });
+
+      expect(foo()).toBe('bar');
+
+      foo();
+      store.patchState({ foo: 'baz' });
+      foo();
+
+      expect(foo()).toBe('baz');
+      expect(projectorExecutionCount).toBe(2);
+    });
+
+    it('creates a signal from the provided state projector function with options', () => {
+      const store = new ComponentStore<{ arr: number[] }>({
+        arr: [10, 20, 30],
+      });
+      let projectorExecutionCount = 0;
+
+      const array = store.selectSignal(
+        (x) => {
+          projectorExecutionCount++;
+          return x.arr;
+        },
+        {
+          equal: (a, b) => a.length === b.length,
+        }
+      );
+
+      array();
+      const result1 = array();
+      expect(result1).toEqual([10, 20, 30]);
+
+      store.patchState({ arr: [30, 20, 10] });
+
+      // should be equal to the previous value because of the custom equality
+      array();
+      const result2 = array();
+      expect(result2).toEqual([10, 20, 30]);
+      expect(result2).toBe(result1);
+      expect(projectorExecutionCount).toBe(2);
+
+      store.patchState({ arr: [10] });
+      array();
+      expect(array()).toEqual([10]);
+      expect(projectorExecutionCount).toBe(3);
+    });
+
+    it('creates a signal by combining provided signals', () => {
+      const store = new ComponentStore<{ x: number; y: number; z: number }>({
+        x: 1,
+        y: 10,
+        z: 100,
+      });
+      let projectorExecutionCount = 0;
+
+      const x = store.selectSignal((s) => s.x);
+      const y = store.selectSignal((s) => s.y);
+      const xPlusY = store.selectSignal(x, y, (x, y) => {
+        projectorExecutionCount++;
+        return x + y;
+      });
+
+      expect(xPlusY()).toBe(11);
+
+      // projector should not be executed
+      store.patchState({ z: 1000 });
+      xPlusY();
+
+      store.patchState({ x: 10 });
+      xPlusY();
+
+      expect(xPlusY()).toBe(20);
+      expect(projectorExecutionCount).toBe(2);
+    });
+
+    it('creates a signal by combining provided signals with options', () => {
+      const store = new ComponentStore<{ x: number; y: number }>({
+        x: 1,
+        y: 10,
+      });
+      let projectorExecutionCount = 0;
+
+      const x = store.selectSignal((s) => s.x);
+      const y = store.selectSignal((s) => s.y);
+      const xPlusY = store.selectSignal(
+        x,
+        y,
+        (x, y) => {
+          projectorExecutionCount++;
+          return x + y;
+        },
+        {
+          equal: (a: number, b: number) => Math.round(a) === Math.round(b),
+        }
+      );
+
+      expect(xPlusY()).toBe(11);
+
+      store.patchState({ x: 1.2 });
+      xPlusY();
+
+      // should be equal to the previous value because of the custom equality
+      expect(xPlusY()).toBe(11);
+      expect(projectorExecutionCount).toBe(2);
+
+      store.patchState({ x: 1.8 });
+      xPlusY();
+      expect(xPlusY()).toBe(11.8);
+      expect(projectorExecutionCount).toBe(3);
+    });
+
+    it('throws an error when the signal is read before the state initialization', () => {
+      const store = new ComponentStore<{ foo: string }>();
+      const foo = store.selectSignal((s) => s.foo);
+
+      expect(() => foo()).toThrowError();
+    });
+  });
+
   describe('effect', () => {
     let componentStore: ComponentStore<object>;
 
