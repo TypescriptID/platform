@@ -1,34 +1,29 @@
 import { signal, WritableSignal } from '@angular/core';
-import { toDeepSignal } from './deep-signal';
+import { DeepSignal, toDeepSignal } from './deep-signal';
 import { defaultEqual } from './select-signal';
-import {
-  NotAllowedStateCheck,
-  SignalState,
-  SignalStateUpdate,
-} from './signal-state-models';
+import { HasFunctionKeys } from './ts-helpers';
+
+export const STATE_SIGNAL = Symbol('STATE_SIGNAL');
+
+export type SignalStateMeta<State extends Record<string, unknown>> = {
+  [STATE_SIGNAL]: WritableSignal<State>;
+};
+
+type SignalStateCheck<State> = HasFunctionKeys<State> extends false | undefined
+  ? unknown
+  : '@ngrx/signals: signal state cannot contain `Function` property or method names';
+
+type SignalState<State extends Record<string, unknown>> = DeepSignal<State> &
+  SignalStateMeta<State>;
 
 export function signalState<State extends Record<string, unknown>>(
-  initialState: State & NotAllowedStateCheck<State>
+  initialState: State & SignalStateCheck<State>
 ): SignalState<State> {
   const stateSignal = signal(initialState as State, { equal: defaultEqual });
   const deepSignal = toDeepSignal(stateSignal.asReadonly());
-  (deepSignal as SignalState<State>).$update =
-    signalStateUpdateFactory(stateSignal);
+  Object.defineProperty(deepSignal, STATE_SIGNAL, {
+    value: stateSignal,
+  });
 
   return deepSignal as SignalState<State>;
-}
-
-export function signalStateUpdateFactory<State extends Record<string, unknown>>(
-  stateSignal: WritableSignal<State>
-): SignalStateUpdate<State>['$update'] {
-  return (...updaters) =>
-    stateSignal.update((state) =>
-      updaters.reduce(
-        (currentState: State, updater) => ({
-          ...currentState,
-          ...(typeof updater === 'function' ? updater(currentState) : updater),
-        }),
-        state
-      )
-    );
 }

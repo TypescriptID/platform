@@ -1,9 +1,18 @@
-import { isSignal, Signal, untracked } from '@angular/core';
+import { Signal, untracked } from '@angular/core';
 import { selectSignal } from './select-signal';
+import { IsUnknownRecord } from './ts-helpers';
 
 export type DeepSignal<T> = Signal<T> &
   (T extends Record<string, unknown>
-    ? Readonly<{ [K in keyof T]: DeepSignal<T[K]> }>
+    ? IsUnknownRecord<T> extends true
+      ? unknown
+      : Readonly<{
+          [K in keyof T]: T[K] extends Record<string, unknown>
+            ? IsUnknownRecord<T[K]> extends true
+              ? Signal<T[K]>
+              : DeepSignal<T[K]>
+            : Signal<T[K]>;
+        }>
     : unknown);
 
 export function toDeepSignal<T>(signal: Signal<T>): DeepSignal<T> {
@@ -14,11 +23,15 @@ export function toDeepSignal<T>(signal: Signal<T>): DeepSignal<T> {
 
   return new Proxy(signal, {
     get(target: any, prop) {
-      if (prop in value && !target[prop]) {
+      if (!(prop in value)) {
+        return target[prop];
+      }
+
+      if (!target[prop]) {
         target[prop] = selectSignal(() => target()[prop]);
       }
 
-      return isSignal(target[prop]) ? toDeepSignal(target[prop]) : target[prop];
+      return toDeepSignal(target[prop]);
     },
   });
 }
