@@ -3,12 +3,22 @@ import { PerformAction, PERFORM_ACTION } from './../src/actions';
 import {
   ReduxDevtoolsExtensionConnection,
   ReduxDevtoolsExtensionConfig,
+  REDUX_DEVTOOLS_EXTENSION,
+  ExtensionActionTypes,
 } from './../src/extension';
 import { Action } from '@ngrx/store';
 
 import { DevtoolsExtension, ReduxDevtoolsExtension } from '../src/extension';
-import { createConfig, DevToolsFeatureOptions } from '../src/config';
+import {
+  createConfig,
+  DevToolsFeatureOptions,
+  STORE_DEVTOOLS_CONFIG,
+  StoreDevtoolsConfig,
+} from '../src/config';
 import { unliftState } from '../src/utils';
+import { TestBed } from '@angular/core/testing';
+import { DevtoolsDispatcher } from '../src/devtools-dispatcher';
+import { inject } from '@angular/core';
 
 function createOptions(
   name = 'NgRx Store DevTools',
@@ -66,34 +76,48 @@ function createState(
         error: null,
       },
     ],
+    connectInZone: false,
     isLocked,
     isPaused,
   };
 }
 
-describe('DevtoolsExtension', () => {
-  let reduxDevtoolsExtension: ReduxDevtoolsExtension;
-  let extensionConnection: ReduxDevtoolsExtensionConnection;
-  let devtoolsExtension: DevtoolsExtension;
+const testSetup = (options: { config: StoreDevtoolsConfig }) => {
+  const reduxDevtoolsExtension = {
+    send: jasmine.createSpy('send'),
+    connect: jasmine.createSpy('connect'),
+  };
 
-  beforeEach(() => {
-    extensionConnection = {
-      init: jasmine.createSpy('init'),
-      subscribe: jasmine.createSpy('subscribe'),
-      unsubscribe: jasmine.createSpy('unsubscribe'),
-      send: jasmine.createSpy('send'),
-      error: jasmine.createSpy('error'),
-    };
+  const extensionConnection = {
+    init: jasmine.createSpy('init'),
+    subscribe: jasmine.createSpy('subscribe'),
+    unsubscribe: jasmine.createSpy('unsubscribe'),
+    send: jasmine.createSpy('send'),
+    error: jasmine.createSpy('error'),
+  };
 
-    reduxDevtoolsExtension = {
-      send: jasmine.createSpy('send'),
-      connect: jasmine.createSpy('connect'),
-    };
-    (reduxDevtoolsExtension.connect as jasmine.Spy).and.returnValue(
-      extensionConnection
-    );
+  (reduxDevtoolsExtension.connect as jasmine.Spy).and.returnValue(
+    extensionConnection
+  );
+
+  TestBed.configureTestingModule({
+    // Provide both the service-to-test and its (spy) dependency
+    providers: [
+      DevtoolsExtension,
+      { provide: REDUX_DEVTOOLS_EXTENSION, useValue: reduxDevtoolsExtension },
+      { provide: STORE_DEVTOOLS_CONFIG, useValue: options.config },
+      { provide: DevtoolsDispatcher, useValue: <any>null },
+    ],
   });
 
+  return {
+    extensionConnection,
+    reduxDevtoolsExtension,
+    devtoolsExtension: TestBed.inject(DevtoolsExtension),
+  };
+};
+
+describe('DevtoolsExtension', () => {
   function myActionSanitizer(action: Action, idx: number) {
     return action;
   }
@@ -103,11 +127,9 @@ describe('DevtoolsExtension', () => {
   }
 
   it('should connect with default options', () => {
-    devtoolsExtension = new DevtoolsExtension(
-      reduxDevtoolsExtension,
-      createConfig({}),
-      <any>null
-    );
+    const { devtoolsExtension, reduxDevtoolsExtension } = testSetup({
+      config: createConfig({}),
+    });
     // Subscription needed or else extension connection will not be established.
     devtoolsExtension.actions$.subscribe(() => null);
     const defaultOptions = createOptions();
@@ -115,9 +137,8 @@ describe('DevtoolsExtension', () => {
   });
 
   it('should connect with given options', () => {
-    devtoolsExtension = new DevtoolsExtension(
-      reduxDevtoolsExtension,
-      createConfig({
+    const { devtoolsExtension, reduxDevtoolsExtension } = testSetup({
+      config: createConfig({
         name: 'ngrx-store-devtool-todolist',
         maxAge: 10,
         serialize: true,
@@ -128,8 +149,7 @@ describe('DevtoolsExtension', () => {
         trace: true,
         traceLimit: 20,
       }),
-      <any>null
-    );
+    });
     // Subscription needed or else extension connection will not be established.
     devtoolsExtension.actions$.subscribe(() => null);
     const options = createOptions(
@@ -149,14 +169,13 @@ describe('DevtoolsExtension', () => {
       replacer: (key: {}, value: any) => value,
     };
 
-    devtoolsExtension = new DevtoolsExtension(
-      reduxDevtoolsExtension,
-      createConfig({
+    const { devtoolsExtension, reduxDevtoolsExtension } = testSetup({
+      config: createConfig({
         name: 'ngrx-store-devtool-todolist',
         serialize: customSerializer,
       }),
-      <any>null
-    );
+    });
+
     // Subscription needed or else extension connection will not be established.
     devtoolsExtension.actions$.subscribe(() => null);
     expect(reduxDevtoolsExtension.connect).toHaveBeenCalledWith(
@@ -164,13 +183,41 @@ describe('DevtoolsExtension', () => {
     );
   });
 
+  for (const { payload, name } of [
+    {
+      payload: "{type: '[Books] Rent', id: 5, customerId: 12}",
+      name: 'evaluates payload because of string',
+    },
+    {
+      payload: { type: '[Books] Rent', id: 5, customerId: 12 },
+      name: 'passes payload through if not of type string',
+    },
+  ]) {
+    it(`should handle an unlifted action (dispatched by DevTools) - ${name}`, () => {
+      const { devtoolsExtension, extensionConnection } = testSetup({
+        config: createConfig({}),
+      });
+      let unwrappedAction: Action | undefined = undefined;
+      devtoolsExtension.actions$.subscribe((action) => {
+        return (unwrappedAction = action);
+      });
+
+      const [callback] = extensionConnection.subscribe.calls.mostRecent().args;
+      callback({ type: ExtensionActionTypes.START });
+      callback({ type: ExtensionActionTypes.ACTION, payload });
+      expect(unwrappedAction).toEqual({
+        type: '[Books] Rent',
+        id: 5,
+        customerId: 12,
+      });
+    });
+  }
+
   describe('notify', () => {
     it('should send notification with default options', () => {
-      devtoolsExtension = new DevtoolsExtension(
-        reduxDevtoolsExtension,
-        createConfig({}),
-        <any>null
-      );
+      const { devtoolsExtension, reduxDevtoolsExtension } = testSetup({
+        config: createConfig({}),
+      });
       const defaultOptions = createOptions();
       const action = {} as LiftedAction;
       const state = createState();
@@ -183,9 +230,8 @@ describe('DevtoolsExtension', () => {
     });
 
     it('should send notification with given options', () => {
-      devtoolsExtension = new DevtoolsExtension(
-        reduxDevtoolsExtension,
-        createConfig({
+      const { devtoolsExtension, reduxDevtoolsExtension } = testSetup({
+        config: createConfig({
           name: 'ngrx-store-devtool-todolist',
           maxAge: 10,
           serialize: true,
@@ -193,8 +239,7 @@ describe('DevtoolsExtension', () => {
           actionSanitizer: myActionSanitizer,
           stateSanitizer: myStateSanitizer,
         }),
-        <any>null
-      );
+      });
 
       const options = createOptions(
         'ngrx-store-devtool-todolist',
@@ -230,12 +275,16 @@ describe('DevtoolsExtension', () => {
       }
 
       describe('should function normally with no sanitizers', () => {
+        let devtoolsExtension: DevtoolsExtension;
+        let extensionConnection: ReduxDevtoolsExtensionConnection;
+        let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
         beforeEach(() => {
-          devtoolsExtension = new DevtoolsExtension(
-            reduxDevtoolsExtension,
-            createConfig({}),
-            <any>null
-          );
+          ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+            testSetup({
+              config: createConfig({}),
+            }));
+
           // Subscription needed or else extension connection will not be established.
           devtoolsExtension.actions$.subscribe(() => null);
         });
@@ -266,14 +315,16 @@ describe('DevtoolsExtension', () => {
       });
 
       describe('should run the action sanitizer on actions', () => {
+        let devtoolsExtension: DevtoolsExtension;
+        let extensionConnection: ReduxDevtoolsExtensionConnection;
+        let reduxDevtoolsExtension: ReduxDevtoolsExtension;
         beforeEach(() => {
-          devtoolsExtension = new DevtoolsExtension(
-            reduxDevtoolsExtension,
-            createConfig({
-              actionSanitizer: testActionSanitizer,
-            }),
-            <any>null
-          );
+          ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+            testSetup({
+              config: createConfig({
+                actionSanitizer: testActionSanitizer,
+              }),
+            }));
           // Subscription needed or else extension connection will not be established.
           devtoolsExtension.actions$.subscribe(() => null);
         });
@@ -312,14 +363,17 @@ describe('DevtoolsExtension', () => {
       });
 
       describe('should run the state sanitizer on store state', () => {
+        let devtoolsExtension: DevtoolsExtension;
+        let extensionConnection: ReduxDevtoolsExtensionConnection;
+        let reduxDevtoolsExtension: ReduxDevtoolsExtension;
         beforeEach(() => {
-          devtoolsExtension = new DevtoolsExtension(
-            reduxDevtoolsExtension,
-            createConfig({
-              stateSanitizer: testStateSanitizer,
-            }),
-            <any>null
-          );
+          ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+            testSetup({
+              config: createConfig({
+                stateSanitizer: testStateSanitizer,
+              }),
+            }));
+
           // Subscription needed or else extension connection will not be established.
           devtoolsExtension.actions$.subscribe(() => null);
         });
@@ -356,15 +410,18 @@ describe('DevtoolsExtension', () => {
       });
 
       describe('sanitizers should not modify original state or actions', () => {
+        let devtoolsExtension: DevtoolsExtension;
+        let extensionConnection: ReduxDevtoolsExtensionConnection;
+        let reduxDevtoolsExtension: ReduxDevtoolsExtension;
         beforeEach(() => {
-          devtoolsExtension = new DevtoolsExtension(
-            reduxDevtoolsExtension,
-            createConfig({
-              actionSanitizer: testActionSanitizer,
-              stateSanitizer: testStateSanitizer,
-            }),
-            <any>null
-          );
+          ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+            testSetup({
+              config: createConfig({
+                actionSanitizer: testActionSanitizer,
+                stateSanitizer: testStateSanitizer,
+              }),
+            }));
+
           // Subscription needed or else extension connection will not be established.
           devtoolsExtension.actions$.subscribe(() => null);
         });
@@ -394,14 +451,17 @@ describe('DevtoolsExtension', () => {
       const BLOCKED_ACTION_1 = '[Test] BLOCKED_ACTION #1';
       const BLOCKED_ACTION_2 = '[Test] BLOCKED_ACTION #2';
 
+      let devtoolsExtension: DevtoolsExtension;
+      let extensionConnection: ReduxDevtoolsExtensionConnection;
+      let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
       beforeEach(() => {
-        devtoolsExtension = new DevtoolsExtension(
-          reduxDevtoolsExtension,
-          createConfig({
-            actionsBlocklist: [BLOCKED_ACTION_1, BLOCKED_ACTION_2],
-          }),
-          <any>null
-        );
+        ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+          testSetup({
+            config: createConfig({
+              actionsBlocklist: [BLOCKED_ACTION_1, BLOCKED_ACTION_2],
+            }),
+          }));
         // Subscription needed or else extension connection will not be established.
         devtoolsExtension.actions$.subscribe(() => null);
       });
@@ -436,14 +496,18 @@ describe('DevtoolsExtension', () => {
       const SAFE_ACTION_1 = '[Test] SAFE_ACTION #1';
       const SAFE_ACTION_2 = '[Test] SAFE_ACTION #2';
 
+      let devtoolsExtension: DevtoolsExtension;
+      let extensionConnection: ReduxDevtoolsExtensionConnection;
+      let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
       beforeEach(() => {
-        devtoolsExtension = new DevtoolsExtension(
-          reduxDevtoolsExtension,
-          createConfig({
-            actionsSafelist: [SAFE_ACTION_1, SAFE_ACTION_2],
-          }),
-          <any>null
-        );
+        ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+          testSetup({
+            config: createConfig({
+              actionsSafelist: [SAFE_ACTION_1, SAFE_ACTION_2],
+            }),
+          }));
+
         // Subscription needed or else extension connection will not be established.
         devtoolsExtension.actions$.subscribe(() => null);
       });
@@ -486,14 +550,18 @@ describe('DevtoolsExtension', () => {
         })
         .and.callThrough();
 
+      let devtoolsExtension: DevtoolsExtension;
+      let extensionConnection: ReduxDevtoolsExtensionConnection;
+      let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
       beforeEach(() => {
-        devtoolsExtension = new DevtoolsExtension(
-          reduxDevtoolsExtension,
-          createConfig({
-            predicate,
-          }),
-          <any>null
-        );
+        ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+          testSetup({
+            config: createConfig({
+              predicate,
+            }),
+          }));
+
         // Subscription needed or else extension connection will not be established.
         devtoolsExtension.actions$.subscribe(() => null);
       });
@@ -524,12 +592,16 @@ describe('DevtoolsExtension', () => {
   });
 
   describe('with locked recording', () => {
+    let devtoolsExtension: DevtoolsExtension;
+    let extensionConnection: ReduxDevtoolsExtensionConnection;
+    let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
     beforeEach(() => {
-      devtoolsExtension = new DevtoolsExtension(
-        reduxDevtoolsExtension,
-        createConfig({}),
-        <any>null
-      );
+      ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+        testSetup({
+          config: createConfig({}),
+        }));
+
       // Subscription needed or else extension connection will not be established.
       devtoolsExtension.actions$.subscribe(() => null);
     });
@@ -559,12 +631,15 @@ describe('DevtoolsExtension', () => {
   });
 
   describe('with paused recording', () => {
+    let devtoolsExtension: DevtoolsExtension;
+    let extensionConnection: ReduxDevtoolsExtensionConnection;
+    let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
     beforeEach(() => {
-      devtoolsExtension = new DevtoolsExtension(
-        reduxDevtoolsExtension,
-        createConfig({}),
-        <any>null
-      );
+      ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+        testSetup({
+          config: createConfig({}),
+        }));
       // Subscription needed or else extension connection will not be established.
       devtoolsExtension.actions$.subscribe(() => null);
     });
@@ -596,12 +671,15 @@ describe('DevtoolsExtension', () => {
   describe('error handling', () => {
     let consoleSpy: jasmine.Spy;
 
+    let devtoolsExtension: DevtoolsExtension;
+    let extensionConnection: ReduxDevtoolsExtensionConnection;
+    let reduxDevtoolsExtension: ReduxDevtoolsExtension;
+
     beforeEach(() => {
-      devtoolsExtension = new DevtoolsExtension(
-        reduxDevtoolsExtension,
-        createConfig({}),
-        <any>null
-      );
+      ({ devtoolsExtension, extensionConnection, reduxDevtoolsExtension } =
+        testSetup({
+          config: createConfig({}),
+        }));
       // Subscription needed or else extension connection will not be established.
       devtoolsExtension.actions$.subscribe();
       consoleSpy = spyOn(console, 'warn');

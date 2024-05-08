@@ -1,8 +1,8 @@
-import { effect, isSignal } from '@angular/core';
 import * as angular from '@angular/core';
+import { effect, isSignal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { patchState, signalState } from '../src';
-import { STATE_SIGNAL } from '../src/signal-state';
-import { testEffects } from './helpers';
+import { STATE_SIGNAL } from '../src/state-signal';
 
 describe('signalState', () => {
   const initialState = {
@@ -85,9 +85,27 @@ describe('signalState', () => {
     expect((state[STATE_SIGNAL] as any).ngrx).toBe(undefined);
   });
 
-  it(
-    'emits new values only for affected signals',
-    testEffects((tick) => {
+  it('overrides Function properties if state keys have the same name', () => {
+    const initialState = { name: { length: { length: 'ngrx' }, name: 20 } };
+    const state = signalState(initialState);
+
+    expect(state()).toBe(initialState);
+
+    expect(state.name()).toBe(initialState.name);
+    expect(isSignal(state.name)).toBe(true);
+
+    expect(state.name.name()).toBe(20);
+    expect(isSignal(state.name.name)).toBe(true);
+
+    expect(state.name.length()).toBe(initialState.name.length);
+    expect(isSignal(state.name.length)).toBe(true);
+
+    expect(state.name.length.length()).toBe('ngrx');
+    expect(isSignal(state.name.length.length)).toBe(true);
+  });
+
+  it('emits new values only for affected signals', () => {
+    TestBed.runInInjectionContext(() => {
       const state = signalState(initialState);
       let numbersEmitted = 0;
       let userEmitted = 0;
@@ -112,14 +130,14 @@ describe('signalState', () => {
       expect(userEmitted).toBe(0);
       expect(firstNameEmitted).toBe(0);
 
-      tick();
+      TestBed.flushEffects();
 
       expect(numbersEmitted).toBe(1);
       expect(userEmitted).toBe(1);
       expect(firstNameEmitted).toBe(1);
 
       patchState(state, { numbers: [1, 2, 3] });
-      tick();
+      TestBed.flushEffects();
 
       expect(numbersEmitted).toBe(2);
       expect(userEmitted).toBe(1);
@@ -128,7 +146,7 @@ describe('signalState', () => {
       patchState(state, (state) => ({
         user: { ...state.user, lastName: 'Schmidt' },
       }));
-      tick();
+      TestBed.flushEffects();
 
       expect(numbersEmitted).toBe(2);
       expect(userEmitted).toBe(2);
@@ -137,11 +155,43 @@ describe('signalState', () => {
       patchState(state, (state) => ({
         user: { ...state.user, firstName: 'Johannes' },
       }));
-      tick();
+      TestBed.flushEffects();
 
       expect(numbersEmitted).toBe(2);
       expect(userEmitted).toBe(3);
       expect(firstNameEmitted).toBe(2);
-    })
-  );
+    });
+  });
+
+  it('does not emit if there was no change', () =>
+    TestBed.runInInjectionContext(() => {
+      let stateCounter = 0;
+      let userCounter = 0;
+      const state = signalState(initialState);
+      const user = state.user;
+
+      effect(() => {
+        state();
+        stateCounter++;
+      });
+
+      effect(() => {
+        user();
+        userCounter++;
+      });
+
+      TestBed.flushEffects();
+      expect(stateCounter).toBe(1);
+      expect(userCounter).toBe(1);
+
+      patchState(state, {});
+      TestBed.flushEffects();
+      expect(stateCounter).toBe(2);
+      expect(userCounter).toBe(1);
+
+      patchState(state, (state) => state);
+      TestBed.flushEffects();
+      expect(stateCounter).toBe(3);
+      expect(userCounter).toBe(1);
+    }));
 });

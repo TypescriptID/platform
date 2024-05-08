@@ -1,13 +1,14 @@
 import { inject, InjectionToken, isSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
+  patchState,
   signalStore,
   withComputed,
   withHooks,
   withMethods,
   withState,
 } from '../src';
-import { STATE_SIGNAL } from '../src/signal-state';
+import { STATE_SIGNAL } from '../src/state-signal';
 import { createLocalService } from './helpers';
 
 describe('signalStore', () => {
@@ -68,6 +69,35 @@ describe('signalStore', () => {
       expect(store.x()).toEqual({ y: { z: 10 } });
       expect(store.x.y()).toEqual({ z: 10 });
       expect(store.x.y.z()).toBe(10);
+    });
+
+    it('overrides Function properties if nested state keys have the same name', () => {
+      const Store = signalStore(
+        withState({ name: { length: { name: false } } })
+      );
+      const store = new Store();
+
+      expect(store.name()).toEqual({ length: { name: false } });
+      expect(isSignal(store.name)).toBe(true);
+
+      expect(store.name.length()).toEqual({ name: false });
+      expect(isSignal(store.name.length)).toBe(true);
+
+      expect(store.name.length.name()).toBe(false);
+      expect(isSignal(store.name.length.name)).toBe(true);
+    });
+
+    it('does not create signals for optional state slices without initial value', () => {
+      type State = { x?: number; y?: { z: number } };
+
+      const Store = signalStore(withState<State>({ x: 10 }));
+      const store = new Store();
+
+      expect(store.x!()).toBe(10);
+      expect(store.y).toBe(undefined);
+
+      patchState(store, { y: { z: 100 } });
+      expect(store.y).toBe(undefined);
     });
 
     it('executes withState factory in injection context', () => {
@@ -238,30 +268,74 @@ describe('signalStore', () => {
       expect(message).toBe('onDestroy');
     });
 
-    it('executes hooks in injection context', () => {
+    it('executes hooks factory in injection context', () => {
       const messages: string[] = [];
-      const TOKEN = new InjectionToken('TOKEN', {
+      const TOKEN_INIT = new InjectionToken('TOKEN_INIT', {
         providedIn: 'root',
-        factory: () => 'ngrx',
+        factory: () => 'init',
+      });
+      const TOKEN_DESTROY = new InjectionToken('TOKEN_DESTROY', {
+        providedIn: 'root',
+        factory: () => 'destroy',
       });
       const Store = signalStore(
-        withHooks({
-          onInit() {
-            inject(TOKEN);
-            messages.push('onInit');
-          },
-          onDestroy() {
-            inject(TOKEN);
-            messages.push('onDestroy');
-          },
+        withState({ name: 'NgRx Store' }),
+        withHooks((store) => {
+          const tokenInit = inject(TOKEN_INIT);
+          const tokenDestroy = inject(TOKEN_DESTROY);
+          return {
+            onInit() {
+              messages.push(`${tokenInit} ${store.name()}`);
+            },
+            onDestroy() {
+              messages.push(`${tokenDestroy} ${store.name()}`);
+            },
+          };
         })
       );
       const { destroy } = createLocalService(Store);
 
-      expect(messages).toEqual(['onInit']);
+      expect(messages).toEqual(['init NgRx Store']);
 
       destroy();
-      expect(messages).toEqual(['onInit', 'onDestroy']);
+      expect(messages).toEqual(['init NgRx Store', 'destroy NgRx Store']);
+    });
+
+    it('executes onInit hook in injection context', () => {
+      const messages: string[] = [];
+      const TOKEN = new InjectionToken('TOKEN', {
+        providedIn: 'root',
+        factory: () => 'init',
+      });
+      const Store = signalStore(
+        withState({ name: 'NgRx Store' }),
+        withHooks({
+          onInit(store, token = inject(TOKEN)) {
+            messages.push(`${token} ${store.name()}`);
+          },
+        })
+      );
+
+      TestBed.configureTestingModule({ providers: [Store] });
+      TestBed.inject(Store);
+
+      expect(messages).toEqual(['init NgRx Store']);
+    });
+
+    it('succeeds with onDestroy and providedIn: root', () => {
+      const messages: string[] = [];
+      const Store = signalStore(
+        { providedIn: 'root' },
+        withHooks({
+          onDestroy() {
+            messages.push('ending...');
+          },
+        })
+      );
+      TestBed.inject(Store);
+      TestBed.resetTestEnvironment();
+
+      expect(messages).toEqual(['ending...']);
     });
   });
 

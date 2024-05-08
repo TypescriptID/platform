@@ -1,29 +1,30 @@
 import { Signal } from '@angular/core';
 import { DeepSignal } from './deep-signal';
-import { SignalStateMeta } from './signal-state';
-import { IsUnknownRecord, Prettify } from './ts-helpers';
+import { StateSignal } from './state-signal';
+import { IsKnownRecord, Prettify } from './ts-helpers';
 
 export type SignalStoreConfig = { providedIn: 'root' };
 
-export type SignalStoreSlices<State> = {
-  [Key in keyof State]: State[Key] extends Record<string, unknown>
-    ? IsUnknownRecord<State[Key]> extends true
-      ? Signal<State[Key]>
-      : DeepSignal<State[Key]>
-    : Signal<State[Key]>;
-};
+export type SignalStoreSlices<State> = IsKnownRecord<
+  Prettify<State>
+> extends true
+  ? {
+      [Key in keyof State]: IsKnownRecord<State[Key]> extends true
+        ? DeepSignal<State[Key]>
+        : Signal<State[Key]>;
+    }
+  : {};
 
-export type SignalStore<FeatureResult extends SignalStoreFeatureResult> =
+export type SignalStoreProps<FeatureResult extends SignalStoreFeatureResult> =
   Prettify<
     SignalStoreSlices<FeatureResult['state']> &
       FeatureResult['signals'] &
-      FeatureResult['methods'] &
-      SignalStateMeta<Prettify<FeatureResult['state']>>
+      FeatureResult['methods']
   >;
 
 export type SignalsDictionary = Record<string, Signal<unknown>>;
 
-export type MethodsDictionary = Record<string, (...args: any[]) => unknown>;
+export type MethodsDictionary = Record<string, Function>;
 
 export type SignalStoreHooks = {
   onInit?: () => void;
@@ -31,7 +32,7 @@ export type SignalStoreHooks = {
 };
 
 export type InnerSignalStore<
-  State extends Record<string, unknown> = Record<string, unknown>,
+  State extends object = object,
   Signals extends SignalsDictionary = SignalsDictionary,
   Methods extends MethodsDictionary = MethodsDictionary
 > = {
@@ -39,10 +40,10 @@ export type InnerSignalStore<
   signals: Signals;
   methods: Methods;
   hooks: SignalStoreHooks;
-} & SignalStateMeta<State>;
+} & StateSignal<State>;
 
 export type SignalStoreFeatureResult = {
-  state: Record<string, unknown>;
+  state: object;
   signals: SignalsDictionary;
   methods: MethodsDictionary;
 };
@@ -59,7 +60,7 @@ export type SignalStoreFeature<
 export type MergeFeatureResults<
   FeatureResults extends SignalStoreFeatureResult[]
 > = FeatureResults extends []
-  ? {}
+  ? EmptyFeatureResult
   : FeatureResults extends [infer First extends SignalStoreFeatureResult]
   ? First
   : FeatureResults extends [

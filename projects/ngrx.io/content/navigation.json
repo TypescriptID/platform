@@ -9,20 +9,12 @@
       "title": "Docs"
     },
     {
-      "url": "enterprise-support",
-      "title": "Enterprise Support"
+      "url": "workshops",
+      "title": "Workshops"
     },
     {
       "url": "https://blog.ngrx.io",
       "title": "Blog"
-    },
-    {
-      "url": "resources",
-      "title": "Resources"
-    },
-    {
-      "url": "events",
-      "title": "Events"
     },
     {
       "url": "https://github.com/sponsors/ngrx",
@@ -42,20 +34,12 @@
           "title": "Docs"
         },
         {
-          "url": "enterprise-support",
-          "title": "Enterprise Support"
+          "url": "workshops",
+          "title": "Workshops"
         },
         {
           "url": "https://blog.ngrx.io",
           "title": "Blog"
-        },
-        {
-          "url": "resources",
-          "title": "Resources"
-        },
-        {
-          "url": "events",
-          "title": "Events"
         },
         {
           "url": "https://github.com/ngrx/platform",
@@ -286,6 +270,69 @@
               "url": "guide/component-store/usage"
             }
           ]
+        },
+        {
+          "title": "@ngrx/signals",
+          "children": [
+            {
+              "title": "Overview",
+              "url": "guide/signals"
+            },
+            {
+              "title": "Installation",
+              "url": "guide/signals/install"
+            },
+            {
+              "title": "SignalStore",
+              "children": [
+                {
+                  "title": "Core Concepts",
+                  "url": "guide/signals/signal-store"
+                },
+                {
+                  "title": "Lifecycle Hooks",
+                  "url": "guide/signals/signal-store/lifecycle-hooks"
+                },                
+                {
+                  "title": "Custom Store Features",
+                  "url": "guide/signals/signal-store/custom-store-features"
+                },
+                {
+                  "title": "Entity Management",
+                  "url": "guide/signals/signal-store/entity-management"
+                }
+              ]
+            },
+            {
+              "title": "SignalState",
+              "url": "guide/signals/signal-state"
+            },
+            {
+              "title": "RxJS Integration",
+              "url": "guide/signals/rxjs-integration"
+            },
+            {
+              "title": "FAQ",
+              "url": "guide/signals/faq"
+            }
+          ]
+        },
+        {
+          "title": "@ngrx/operators",
+          "children": [
+            {
+              "title": "Overview",
+              "url": "guide/operators"
+            },
+            {
+              "title": "Installation",
+              "url": "guide/operators/install"
+            },
+            {
+              "title": "Operators",
+              "url": "guide/operators/operators"
+            }
+          ]
         }
       ]
     },
@@ -506,6 +553,10 @@
       "title": "Migrations",
       "children": [
         {
+          "title": "V17",
+          "url": "guide/migration/v17"
+        },
+        {
           "title": "V16",
           "url": "guide/migration/v16"
         },
@@ -562,9 +613,9 @@
       "tooltip": "Contributing"
     },
     {
-      "url": "enterprise-support",
-      "title": "Enterprise Support",
-      "tooltip": "Enterprise Support"
+      "url": "workshops",
+      "title": "Workshops",
+      "tooltip": "Workshops"
     }
   ],
   "Footer": [
@@ -607,11 +658,6 @@
           "tooltip": "NgRx Community Discord Server - chat with other members of the community."
         },
         {
-          "url": "https://gitter.im/ngrx/platform",
-          "title": "Gitter",
-          "tooltip": "Chat about NgRx with other members of the community."
-        },
-        {
           "url": "https://github.com/ngrx/platform/issues/new/choose",
           "title": "Report Issues",
           "tooltip": "Post issues and suggestions on GitHub."
@@ -650,6 +696,10 @@
     }
   ],
   "docVersions": [
+    {
+      "title": "v16",
+      "url": "https://v16.ngrx.io"
+    },
     {
       "title": "v15",
       "url": "https://v15.ngrx.io"

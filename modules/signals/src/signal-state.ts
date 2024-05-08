@@ -1,22 +1,11 @@
-import { signal, WritableSignal } from '@angular/core';
+import { signal } from '@angular/core';
+import { STATE_SIGNAL, StateSignal } from './state-signal';
 import { DeepSignal, toDeepSignal } from './deep-signal';
-import { HasFunctionKeys } from './ts-helpers';
 
-export const STATE_SIGNAL = Symbol('STATE_SIGNAL');
+type SignalState<State extends object> = DeepSignal<State> & StateSignal<State>;
 
-export type SignalStateMeta<State extends Record<string, unknown>> = {
-  [STATE_SIGNAL]: WritableSignal<State>;
-};
-
-type SignalStateCheck<State> = HasFunctionKeys<State> extends false | undefined
-  ? unknown
-  : '@ngrx/signals: signal state cannot contain `Function` property or method names';
-
-type SignalState<State extends Record<string, unknown>> = DeepSignal<State> &
-  SignalStateMeta<State>;
-
-export function signalState<State extends Record<string, unknown>>(
-  initialState: State & SignalStateCheck<State>
+export function signalState<State extends object>(
+  initialState: State
 ): SignalState<State> {
   const stateSignal = signal(initialState as State);
   const deepSignal = toDeepSignal(stateSignal.asReadonly());

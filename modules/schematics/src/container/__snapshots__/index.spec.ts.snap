@@ -11,16 +11,15 @@ exports[`Container Schematic display-block should create add style if true 1`] =
 
 exports[`Container Schematic should import Store into the component 1`] = `
 "import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import * as fromStore from '../reducers';
 
 @Component({
   selector: 'app-foo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './foo.component.html',
-  styleUrls: ['./foo.component.css']
+  styleUrl: './foo.component.css'
 })
 export class FooComponent {
   constructor(private store: Store) {}
@@ -30,15 +29,14 @@ export class FooComponent {
 
 exports[`Container Schematic should respect the state option if not provided 1`] = `
 "import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-foo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './foo.component.html',
-  styleUrls: ['./foo.component.css']
+  styleUrl: './foo.component.css'
 })
 export class FooComponent {
   constructor(private store: Store) {}
@@ -119,15 +117,14 @@ describe('FooComponent', () => {
 
 exports[`Container Schematic standalone should create a standalone component if true 1`] = `
 "import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 
 @Component({
   selector: 'app-foo',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './foo.component.html',
-  styleUrls: ['./foo.component.css']
+  styleUrl: './foo.component.css'
 })
 export class FooComponent {
   constructor(private store: Store) {}

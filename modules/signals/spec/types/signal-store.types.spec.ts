@@ -33,7 +33,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'Store',
-      'Type<{ foo: Signal<string>; bar: Signal<number[]>; [STATE_SIGNAL]: WritableSignal<{ foo: string; bar: number[]; }>; }>'
+      'Type<{ foo: Signal<string>; bar: Signal<number[]>; } & StateSignal<{ foo: string; bar: number[]; }>>'
     );
   });
 
@@ -63,7 +63,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ user: DeepSignal<{ age: number; details: { first: string; flags: boolean[]; }; }>; [STATE_SIGNAL]: WritableSignal<{ user: { age: number; details: { first: string; flags: boolean[]; }; }; }>; }'
+      '{ user: DeepSignal<{ age: number; details: { first: string; flags: boolean[]; }; }>; } & StateSignal<{ user: { age: number; details: { first: string; flags: boolean[]; }; }; }>'
     );
 
     expectSnippet(snippet).toInfer(
@@ -115,26 +115,87 @@ describe('signalStore', () => {
     );
   });
 
-  it('does not create deep signals when state slice type is an interface', () => {
+  it('creates deep signals when state type is an interface', () => {
     const snippet = `
       interface User {
         firstName: string;
         lastName: string;
       }
 
-      type State = { user: User };
+      interface State {
+        user: User;
+        num: number;
+        map: Map<string, { foo: number }>;
+        set: Set<number>;
+      }
 
       const Store = signalStore(
-        withState<State>({ user: { firstName: 'John', lastName: 'Smith' } })
+        withState<State>({
+          user: { firstName: 'John', lastName: 'Smith' },
+          num: 10,
+          map: new Map<string, { foo: number }>(),
+          set: new Set<number>(),
+        })
       );
 
       const store = new Store();
       const user = store.user;
+      const firstName = store.user.firstName;
+      const num = store.num;
+      const map = store.map;
+      const set = store.set;
     `;
 
     expectSnippet(snippet).toSucceed();
 
-    expectSnippet(snippet).toInfer('user', 'Signal<User>');
+    expectSnippet(snippet).toInfer('user', 'DeepSignal<User>');
+
+    expectSnippet(snippet).toInfer('firstName', 'Signal<string>');
+
+    expectSnippet(snippet).toInfer('num', 'Signal<number>');
+
+    expectSnippet(snippet).toInfer(
+      'map',
+      'Signal<Map<string, { foo: number; }>>'
+    );
+
+    expectSnippet(snippet).toInfer('set', 'Signal<Set<number>>');
+  });
+
+  it('does not create deep signals when state type is an array', () => {
+    const snippet = `
+      const Store = signalStore(withState<number[]>([]));
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer('storeKeys', 'unique symbol');
+  });
+
+  it('does not create deep signals when state type is Map', () => {
+    const snippet = `
+      const Store = signalStore(withState(new Map<string, { foo: number }>()));
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer('storeKeys', 'unique symbol');
+  });
+
+  it('does not create deep signals when state type is Set', () => {
+    const snippet = `
+      const Store = signalStore(withState(new Set<{ foo: string }>()));
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer('storeKeys', 'unique symbol');
   });
 
   it('succeeds when state is an empty object', () => {
@@ -142,10 +203,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toSucceed();
 
-    expectSnippet(snippet).toInfer(
-      'Store',
-      'Type<{ [STATE_SIGNAL]: WritableSignal<{}>; }>'
-    );
+    expectSnippet(snippet).toInfer('Store', 'Type<{} & StateSignal<{}>>');
   });
 
   it('succeeds when state slices are union types', () => {
@@ -176,7 +234,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ foo: Signal<number | { s: string; }>; bar: DeepSignal<{ baz: { b: boolean; } | null; }>; x: DeepSignal<{ y: { z: number | undefined; }; }>; [STATE_SIGNAL]: WritableSignal<...>; }'
+      '{ foo: Signal<number | { s: string; }>; bar: DeepSignal<{ baz: { b: boolean; } | null; }>; x: DeepSignal<{ y: { z: number | undefined; }; }>; } & StateSignal<{ foo: number | { ...; }; bar: { ...; }; x: { ...; }; }>'
     );
 
     expectSnippet(snippet).toInfer('foo', 'Signal<number | { s: string; }>');
@@ -216,7 +274,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet1).toInfer(
       'Store',
-      'Type<{ name: DeepSignal<{ x: { y: string; }; }>; arguments: Signal<number[]>; call: Signal<boolean>; [STATE_SIGNAL]: WritableSignal<{ name: { x: { y: string; }; }; arguments: number[]; call: boolean; }>; }>'
+      'Type<{ name: DeepSignal<{ x: { y: string; }; }>; arguments: Signal<number[]>; call: Signal<boolean>; } & StateSignal<{ name: { x: { y: string; }; }; arguments: number[]; call: boolean; }>>'
     );
 
     const snippet2 = `
@@ -233,7 +291,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet2).toInfer(
       'Store',
-      ' Type<{ apply: Signal<string>; bind: DeepSignal<{ foo: string; }>; prototype: Signal<string[]>; [STATE_SIGNAL]: WritableSignal<{ apply: string; bind: { foo: string; }; prototype: string[]; }>; }>'
+      'Type<{ apply: Signal<string>; bind: DeepSignal<{ foo: string; }>; prototype: Signal<string[]>; } & StateSignal<{ apply: string; bind: { foo: string; }; prototype: string[]; }>>'
     );
 
     const snippet3 = `
@@ -249,66 +307,39 @@ describe('signalStore', () => {
 
     expectSnippet(snippet3).toInfer(
       'Store',
-      'Type<{ length: Signal<number>; caller: Signal<undefined>; [STATE_SIGNAL]: WritableSignal<{ length: number; caller: undefined; }>; }>'
+      'Type<{ length: Signal<number>; caller: Signal<undefined>; } & StateSignal<{ length: number; caller: undefined; }>>'
     );
   });
 
-  it('fails when nested state slices contain Function properties', () => {
-    expectSnippet(`
-      const Store = signalStore(withState({ x: { name?: '' } }));
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
+  it('succeeds when nested state slices contain Function properties', () => {
+    const snippet1 = `
+      type State = { x: { name?: string } };
+      const Store = signalStore(withState<State>({ x: { name: '' } }));
+      const store = new Store();
+      const name = store.x.name;
+    `;
+
+    expectSnippet(snippet1).toSucceed();
+    expectSnippet(snippet1).toInfer(
+      'name',
+      'Signal<string | undefined> | undefined'
     );
 
-    expectSnippet(`
-      const Store = signalStore(withState({ x: { arguments: [] } }));
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
-
-    expectSnippet(`
+    const snippet2 = `
       const Store = signalStore(
-        withState({ x: { bar: { call: false }, baz: 1 } })
+        withState({ x: { length: { name: false }, baz: 1 } })
       );
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
+      const store = new Store();
+      const length = store.x.length;
+      const name = store.x.length.name;
+    `;
 
-    expectSnippet(`
-      const Store = signalStore(
-        withState({ x: { apply: 'apply', bar: true } })
-      )
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
+    expectSnippet(snippet2).toSucceed();
+    expectSnippet(snippet2).toInfer(
+      'length',
+      'Signal<{ name: boolean; }> & Readonly<{ name: Signal<boolean>; }>'
     );
-
-    expectSnippet(`
-      const Store = signalStore(
-        withState({ x: { bind: { foo: 'bar' } } })
-      );
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
-
-    expectSnippet(`
-      const Store = signalStore(
-        withState({ x: { bar: { prototype: [] }; baz: 1 } })
-      );
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
-
-    expectSnippet(`
-      const Store = signalStore(withState({ x: { length: 10 } }));
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
-
-    expectSnippet(`
-      const Store = signalStore(withState({ x: { caller: '' } }));
-    `).toFail(
-      /@ngrx\/signals: nested state slices cannot contain `Function` property or method names/
-    );
+    expectSnippet(snippet2).toInfer('name', 'Signal<boolean>');
   });
 
   it('succeeds when nested state slices are optional', () => {
@@ -331,7 +362,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ bar: DeepSignal<{ baz?: number | undefined; }>; x: DeepSignal<{ y?: { z: boolean; } | undefined; }>; [STATE_SIGNAL]: WritableSignal<{ bar: { baz?: number | undefined; }; x: { y?: { ...; } | undefined; }; }>; }'
+      '{ bar: DeepSignal<{ baz?: number | undefined; }>; x: DeepSignal<{ y?: { z: boolean; } | undefined; }>; } & StateSignal<{ bar: { baz?: number | undefined; }; x: { y?: { z: boolean; } | undefined; }; }>'
     );
 
     expectSnippet(snippet).toInfer(
@@ -355,8 +386,8 @@ describe('signalStore', () => {
     );
   });
 
-  it('fails when root state slices are optional', () => {
-    expectSnippet(`
+  it('succeeds when root state slices are optional', () => {
+    const snippet = `
       type State = {
         foo?: { s: string };
         bar: number;
@@ -365,26 +396,51 @@ describe('signalStore', () => {
       const Store = signalStore(
         withState<State>({ foo: { s: '' }, bar: 1 })
       );
-    `).toFail(/@ngrx\/signals: root state slices cannot be optional/);
+      const store = new Store();
+      const foo = store.foo;
+    `;
+
+    expectSnippet(snippet).toSucceed();
+    expectSnippet(snippet).toInfer(
+      'foo',
+      'Signal<{ s: string; } | undefined> | undefined'
+    );
   });
 
-  it('fails when state is an unknown record', () => {
-    expectSnippet(`
-      const Store1 = signalStore(withState<{ [key: string]: number }>({}));
-    `).toFail(/@ngrx\/signals: root state keys must be string literals/);
+  it('does not create deep signals when state is an unknown record', () => {
+    const snippet1 = `
+      const Store = signalStore(withState<{ [key: string]: number }>({}));
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
 
-    expectSnippet(`
-      const Store2 = signalStore(withState<{ [key: number]: { bar: string } }>({}));
-    `).toFail(/@ngrx\/signals: root state keys must be string literals/);
+    expectSnippet(snippet1).toSucceed();
+    expectSnippet(snippet1).toInfer('storeKeys', 'unique symbol');
 
-    expectSnippet(`
-      const Store3 = signalStore(
+    const snippet2 = `
+      const Store = signalStore(
+        withState<{ [key: number]: { bar: string } }>({})
+      );
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
+
+    expectSnippet(snippet2).toSucceed();
+    expectSnippet(snippet2).toInfer('storeKeys', 'unique symbol');
+
+    const snippet3 = `
+      const Store = signalStore(
         withState<Record<string, { foo: boolean } | number>>({
           x: { foo: true },
           y: 1,
         })
       );
-    `).toFail(/@ngrx\/signals: root state keys must be string literals/);
+      const store = new Store();
+      declare const storeKeys: keyof typeof store;
+    `;
+
+    expectSnippet(snippet3).toSucceed();
+    expectSnippet(snippet3).toInfer('storeKeys', 'unique symbol');
   });
 
   it('fails when state is not an object', () => {
@@ -395,25 +451,6 @@ describe('signalStore', () => {
     expectSnippet(`const Store = signalStore(withState(null));`).toFail();
 
     expectSnippet(`const Store = signalStore(withState(true));`).toFail();
-
-    expectSnippet(
-      `const Store = signalStore(withState(['ng', 'rx']));`
-    ).toFail();
-  });
-
-  it('fails when state type is defined as an interface', () => {
-    expectSnippet(`
-      interface User {
-        firstName: string;
-        lastName: string;
-      }
-
-      const Store = signalStore(
-        withState<User>({ firstName: 'John', lastName: 'Smith' })
-      );
-    `).toFail(
-      /Type 'User' does not satisfy the constraint 'Record<string, unknown>'/
-    );
   });
 
   it('patches state via sequence of partial state objects and updater functions', () => {
@@ -554,7 +591,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ ngrx: Signal<string>; x: DeepSignal<{ y: string; }>; signals: Signal<number[]>; mgmt: (arg: boolean) => number; [STATE_SIGNAL]: WritableSignal<{ ngrx: string; x: { y: string; }; }>; }'
+      '{ ngrx: Signal<string>; x: DeepSignal<{ y: string; }>; signals: Signal<number[]>; mgmt: (arg: boolean) => number; } & StateSignal<{ ngrx: string; x: { y: string; }; }>'
     );
   });
 
@@ -582,8 +619,25 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ foo: Signal<number>; bar: Signal<string>; baz: (x: number) => void; [STATE_SIGNAL]: WritableSignal<{ foo: number; }>; }'
+      '{ foo: Signal<number>; bar: Signal<string>; baz: (x: number) => void; } & StateSignal<{ foo: number; }>'
     );
+  });
+
+  it('correctly infers the type of methods with generics', () => {
+    const snippet = `
+      const Store = signalStore(
+        withMethods(() => ({
+          log<Str extends string>(str: Str) {
+            console.log(str);
+          },
+        }))
+      );
+
+      const store = inject(Store);
+    `;
+
+    expectSnippet(snippet + `store.log('ngrx');`).toSucceed();
+    expectSnippet(snippet + `store.log(10);`).toFail();
   });
 
   describe('custom features', () => {

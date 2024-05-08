@@ -1,3 +1,196 @@
+<a name="17.2.0"></a>
+
+# [17.2.0](https://github.com/ngrx/platform/compare/17.1.1...17.2.0) (2024-04-11)
+
+### Bug Fixes
+
+- **effects:** make createEffect work with TS 5.3 ([#4296](https://github.com/ngrx/platform/issues/4296)) ([19c1f11](https://github.com/ngrx/platform/commit/19c1f11))
+- **ngrx.io:** set correct path for pwa icons ([#4263](https://github.com/ngrx/platform/issues/4263)) ([703a9c7](https://github.com/ngrx/platform/commit/703a9c7))
+- **schematics:** correct module while generating a feature ([#4289](https://github.com/ngrx/platform/issues/4289)) ([7ecffe8](https://github.com/ngrx/platform/commit/7ecffe8)), closes [#4281](https://github.com/ngrx/platform/issues/4281)
+- **signals:** make patchState work with TS 5.4 ([#4294](https://github.com/ngrx/platform/issues/4294)) ([6b440ee](https://github.com/ngrx/platform/commit/6b440ee))
+
+### Features
+
+- **component-store:** deprecate `tapResponse` export ([#4259](https://github.com/ngrx/platform/issues/4259)) ([a5958a0](https://github.com/ngrx/platform/commit/a5958a0))
+- **effects:** deprecate `concatLatestFrom` export ([#4260](https://github.com/ngrx/platform/issues/4260)) ([79674b7](https://github.com/ngrx/platform/commit/79674b7))
+
+<a name="17.1.1"></a>
+
+## [17.1.1](https://github.com/ngrx/platform/compare/17.1.0...17.1.1) (2024-02-21)
+
+### Bug Fixes
+
+- **signals:** add `StateSignal` to the public API ([#4247](https://github.com/ngrx/platform/issues/4247)) ([3d45e5a](https://github.com/ngrx/platform/commit/3d45e5a))
+- **signals:** correctly infer the type of methods with generics ([#4249](https://github.com/ngrx/platform/issues/4249)) ([70517ea](https://github.com/ngrx/platform/commit/70517ea))
+- **signals:** run `rxMethod` outside of reactive context ([#4224](https://github.com/ngrx/platform/issues/4224)) ([3a691d9](https://github.com/ngrx/platform/commit/3a691d9))
+- **store-devtools:** replace direct with indirect `eval` ([#4216](https://github.com/ngrx/platform/issues/4216)) ([1df0eb5](https://github.com/ngrx/platform/commit/1df0eb5)), closes [#4213](https://github.com/ngrx/platform/issues/4213)
+
+### Performance Improvements
+
+- **signals:** avoid creating unnecessary objects in excludeKeys ([#4240](https://github.com/ngrx/platform/issues/4240)) ([b90da9d](https://github.com/ngrx/platform/commit/b90da9d))
+- **signals:** avoid unecessary observable conversions in rxMethod ([#4219](https://github.com/ngrx/platform/issues/4219)) ([fa45d92](https://github.com/ngrx/platform/commit/fa45d92))
+
+<a name="17.1.0"></a>
+
+# [17.1.0](https://github.com/ngrx/platform/compare/17.0.1...17.1.0) (2024-01-16)
+
+### Bug Fixes
+
+- **eslint-plugin:** only report main pipe violations ([#4169](https://github.com/ngrx/platform/issues/4169)) ([970514e](https://github.com/ngrx/platform/commit/970514e))
+- **signals:** run `onDestroy` outside of injection context ([#4200](https://github.com/ngrx/platform/issues/4200)) ([e21df19](https://github.com/ngrx/platform/commit/e21df19))
+
+### Features
+
+- **signals:** add `withHooks` signature with factory input ([#4208](https://github.com/ngrx/platform/issues/4208)) ([916fba0](https://github.com/ngrx/platform/commit/916fba0)), closes [#4201](https://github.com/ngrx/platform/issues/4201)
+
+<a name="17.0.1"></a>
+
+## [17.0.1](https://github.com/ngrx/platform/compare/17.0.0...17.0.1) (2023-11-27)
+
+### Bug Fixes
+
+- **signals:** allow using signalStore and signalState in TS libs ([#4152](https://github.com/ngrx/platform/issues/4152)) ([ecc247c](https://github.com/ngrx/platform/commit/ecc247c))
+- **signals:** define deep signals as configurable properties ([#4147](https://github.com/ngrx/platform/issues/4147)) ([890ca5b](https://github.com/ngrx/platform/commit/890ca5b))
+
+<a name="17.0.0"></a>
+
+# [17.0.0](https://github.com/ngrx/platform/compare/17.0.0-rc.0...17.0.0) (2023-11-20)
+
+### Bug Fixes
+
+- **data:** DefaultDataService getAll httpOptions fix + test ([#4134](https://github.com/ngrx/platform/issues/4134)) ([213e4c9](https://github.com/ngrx/platform/commit/213e4c9))
+- **signals:** remove state checks for better DX ([#4124](https://github.com/ngrx/platform/issues/4124)) ([5749543](https://github.com/ngrx/platform/commit/5749543))
+
+### Features
+
+- **signals:** provide ability to use interface as state type ([#4133](https://github.com/ngrx/platform/issues/4133)) ([9c8304a](https://github.com/ngrx/platform/commit/9c8304a))
+
+<a name="17.0.0-rc.0"></a>
+
+# [17.0.0-rc.0](https://github.com/ngrx/platform/compare/17.0.0-beta.0...17.0.0-rc.0) (2023-11-10)
+
+### Features
+
+- **signals:** add `getState` function ([#4118](https://github.com/ngrx/platform/issues/4118)) ([79b0708](https://github.com/ngrx/platform/commit/79b0708))
+- **signals:** add entities subpackage ([#4090](https://github.com/ngrx/platform/issues/4090)) ([f01bcd1](https://github.com/ngrx/platform/commit/f01bcd1))
+- **store-devtools:** add migration for connectInZone ([#4106](https://github.com/ngrx/platform/issues/4106)) ([73fda59](https://github.com/ngrx/platform/commit/73fda59))
+- **store-devtools:** change connectOutsideZone to be 'true' by default ([#4103](https://github.com/ngrx/platform/issues/4103)) ([d3b4db0](https://github.com/ngrx/platform/commit/d3b4db0)), closes [#4093](https://github.com/ngrx/platform/issues/4093)
+
+<a name="17.0.0-beta.0"></a>
+
+# [17.0.0-beta.0](https://github.com/ngrx/platform/compare/16.3.0...17.0.0-beta.0) (2023-10-30)
+
+### Bug Fixes
+
+- **entity:** set correct return type for getSelectors signature with parent selector ([#4074](https://github.com/ngrx/platform/issues/4074)) ([b3b571e](https://github.com/ngrx/platform/commit/b3b571e))
+- **signals:** do not create nested signals for STATE_SIGNAL property ([#4062](https://github.com/ngrx/platform/issues/4062)) ([71a9d7f](https://github.com/ngrx/platform/commit/71a9d7f))
+- **signals:** improve state type and add type tests ([#4064](https://github.com/ngrx/platform/issues/4064)) ([10c93ed](https://github.com/ngrx/platform/commit/10c93ed)), closes [#4065](https://github.com/ngrx/platform/issues/4065)
+
+### Features
+
+- **component:** remove `LetModule` ([#4087](https://github.com/ngrx/platform/issues/4087)) ([f28ea71](https://github.com/ngrx/platform/commit/f28ea71)), closes [#4077](https://github.com/ngrx/platform/issues/4077)
+- **component:** remove PushModule ([7316d1a](https://github.com/ngrx/platform/commit/7316d1a))
+- **effects:** deprecate act operator ([#4073](https://github.com/ngrx/platform/issues/4073)) ([3dbcadc](https://github.com/ngrx/platform/commit/3dbcadc))
+- **operators:** introduce [@ngrx](https://github.com/ngrx)/operators package ([#4097](https://github.com/ngrx/platform/issues/4097)) ([e93ead4](https://github.com/ngrx/platform/commit/e93ead4)), closes [#4057](https://github.com/ngrx/platform/issues/4057)
+- **signals:** remove selectSignal and rename withSignals to withComputed ([#4075](https://github.com/ngrx/platform/issues/4075)) ([25f95bc](https://github.com/ngrx/platform/commit/25f95bc))
+- upgrade Angular dependencies to v17 pre-release versions ([#4068](https://github.com/ngrx/platform/issues/4068)) ([3d25047](https://github.com/ngrx/platform/commit/3d25047))
+- **signals:** add rxjs-interop subpackage ([#4061](https://github.com/ngrx/platform/issues/4061)) ([fd565ed](https://github.com/ngrx/platform/commit/fd565ed))
+
+### BREAKING CHANGES
+
+- **component:** The LetModule is removed in favor of the standalone LetDirective.
+
+BEFORE:
+
+import { LetModule } from '@ngrx/component';
+
+@NgModule({
+imports: [
+// ... other imports
+LetModule,
+],
+})
+export class MyFeatureModule {}
+
+AFTER:
+
+import { LetDirective } from '@ngrx/component';
+
+@NgModule({
+imports: [
+// ... other imports
+LetDirective,
+],
+})
+export class MyFeatureModule {}
+
+- **component:** The `PushModule` is deprecated in favor of the standalone `PushPipe`.
+
+BEFORE:
+
+```ts
+import { PushModule } from '@ngrx/component';
+
+@NgModule({
+  imports: [
+    // ... other imports
+    PushModule,
+  ],
+})
+export class MyFeatureModule {}
+```
+
+AFTER:
+
+```ts
+import { Component } from '@angular/core';
+import { PushPipe } from '@ngrx/component';
+
+@Component({
+  // ... other metadata
+  standalone: true,
+  imports: [
+    // ... other imports
+    PushPipe,
+  ],
+})
+export class MyStandaloneComponent {}
+```
+
+- **entity:** Selectors returned by the `adapter.getSelectors` signature that accepts a parent selector are strongly typed.
+
+BEFORE:
+
+```ts
+const {
+  selectIds, // type: (state: object) => string[] | number[]
+  selectEntities, // type: (state: object) => Dictionary<Book>
+  selectAll, // type: (state: object) => Book[]
+  selectTotal, // type: (state: object) => number
+} = adapter.getSelectors(selectBooksState);
+```
+
+AFTER:
+
+```ts
+const {
+  selectIds, // type: MemoizedSelector<object, string[] | number[]>
+  selectEntities, // type: MemoizedSelector<object, Dictionary<Book>>
+  selectAll, // type: MemoizedSelector<object, Book[]>
+  selectTotal, // type: MemoizedSelector<object, number>
+} = adapter.getSelectors(selectBooksState);
+```
+
+- The minimum required version of Angular has been updated
+
+BEFORE:
+
+The minimum required version of Angular is 16.x
+
+AFTER:
+
+The minimum required version of Angular is 17.x
+
 <a name="16.3.0"></a>
 
 # [16.3.0](https://github.com/ngrx/platform/compare/16.2.0...16.3.0) (2023-10-03)

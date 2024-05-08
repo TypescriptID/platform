@@ -1,24 +1,11 @@
 import { Component, inject, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
-export function testEffects(testFn: (tick: () => void) => void): () => void {
-  @Component({ template: '', standalone: true })
-  class TestComponent {}
-
-  return () => {
-    const fixture = TestBed.configureTestingModule({
-      imports: [TestComponent],
-    }).createComponent(TestComponent);
-
-    TestBed.runInInjectionContext(() => testFn(() => fixture.detectChanges()));
-  };
-}
-
 export function createLocalService<Service extends Type<unknown>>(
   serviceToken: Service
 ): {
   service: InstanceType<Service>;
-  tick: () => void;
+  flushEffects: () => void;
   destroy: () => void;
 } {
   @Component({
@@ -33,10 +20,11 @@ export function createLocalService<Service extends Type<unknown>>(
   const fixture = TestBed.configureTestingModule({
     imports: [TestComponent],
   }).createComponent(TestComponent);
+  fixture.detectChanges();
 
   return {
     service: fixture.componentInstance.service,
-    tick: () => fixture.detectChanges(),
+    flushEffects: () => TestBed.flushEffects(),
     destroy: () => fixture.destroy(),
   };
 }
