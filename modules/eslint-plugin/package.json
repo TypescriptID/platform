@@ -1,6 +1,6 @@
 {
   "name": "@ngrx/eslint-plugin",
-  "version": "17.2.0",
+  "version": "18.0.0-beta.1",
   "description": "NgRx ESLint Plugin",
   "repository": {
     "type": "git",
@@ -34,6 +34,9 @@
       "@ngrx/signals"
     ],
     "migrations": "./migrations/migration.json"
+  },
+  "ng-add": {
+    "save": "devDependencies"
   },
   "sideEffects": false,
   "dependencies": {
