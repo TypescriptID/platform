@@ -1,10 +1,16 @@
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { addEntities, removeEntities, withEntities } from '../../src';
+import {
+  addEntities,
+  entityConfig,
+  removeEntities,
+  withEntities,
+} from '../../src';
 import { Todo, todo1, todo2, todo3, User, user1, user2, user3 } from '../mocks';
+import { selectTodoId } from '../helpers';
 
 describe('removeEntities', () => {
   it('removes entities by ids', () => {
-    const Store = signalStore(withEntities<User>());
+    const Store = signalStore({ protectedState: false }, withEntities<User>());
     const store = new Store();
 
     patchState(
@@ -19,12 +25,12 @@ describe('removeEntities', () => {
   });
 
   it('removes entities by predicate', () => {
-    const Store = signalStore(withEntities<Todo>());
+    const Store = signalStore({ protectedState: false }, withEntities<Todo>());
     const store = new Store();
 
     patchState(
       store,
-      addEntities([todo1, todo2, todo3], { idKey: '_id' }),
+      addEntities([todo1, todo2, todo3], { selectId: selectTodoId }),
       removeEntities((todo) => todo.completed)
     );
 
@@ -34,7 +40,7 @@ describe('removeEntities', () => {
   });
 
   it('does not modify entity state if entities do not exist', () => {
-    const Store = signalStore(withEntities<User>());
+    const Store = signalStore({ protectedState: false }, withEntities<User>());
     const store = new Store();
 
     patchState(store, addEntities([user1, user2, user3]));
@@ -59,16 +65,19 @@ describe('removeEntities', () => {
   });
 
   it('removes entities by ids from specified collection', () => {
-    const userMeta = {
+    const userConfig = entityConfig({
       entity: type<User>(),
       collection: 'users',
-    } as const;
+    });
 
-    const Store = signalStore(withEntities(userMeta));
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities(userConfig)
+    );
     const store = new Store();
 
-    patchState(store, addEntities([user1, user2, user3], userMeta));
-    patchState(store, removeEntities([user1.id, user2.id], userMeta));
+    patchState(store, addEntities([user1, user2, user3], userConfig));
+    patchState(store, removeEntities([user1.id, user2.id], userConfig));
 
     expect(store.usersEntityMap()).toEqual({ 3: user3 });
     expect(store.usersIds()).toEqual([3]);
@@ -76,18 +85,21 @@ describe('removeEntities', () => {
   });
 
   it('removes entities by predicate from specified collection', () => {
-    const userMeta = {
+    const userConfig = entityConfig({
       entity: type<User>(),
       collection: 'users',
-    } as const;
+    });
 
-    const Store = signalStore(withEntities(userMeta));
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities(userConfig)
+    );
     const store = new Store();
 
     patchState(
       store,
-      addEntities([user1, user2, user3], userMeta),
-      removeEntities((user) => user.lastName.startsWith('J'), userMeta)
+      addEntities([user1, user2, user3], userConfig),
+      removeEntities((user) => user.lastName.startsWith('J'), userConfig)
     );
 
     expect(store.usersEntityMap()).toEqual({ 1: user1, 2: user2 });
@@ -96,16 +108,19 @@ describe('removeEntities', () => {
   });
 
   it('does not modify entity state if entities do not exist in specified collection', () => {
-    const todoMeta = {
+    const todoConfig = entityConfig({
       entity: type<Todo>(),
       collection: 'todo',
-      idKey: '_id',
-    } as const;
+      selectId: selectTodoId,
+    });
 
-    const Store = signalStore(withEntities(todoMeta));
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities(todoConfig)
+    );
     const store = new Store();
 
-    patchState(store, addEntities([todo1, todo2, todo3], todoMeta));
+    patchState(store, addEntities([todo1, todo2, todo3], todoConfig));
 
     const todoEntityMap = store.todoEntityMap();
     const todoIds = store.todoIds();
@@ -113,8 +128,8 @@ describe('removeEntities', () => {
 
     patchState(
       store,
-      removeEntities(['a', 'b'], todoMeta),
-      removeEntities((todo) => todo.text === 'NgRx', todoMeta)
+      removeEntities(['a', 'b'], todoConfig),
+      removeEntities((todo) => todo.text === 'NgRx', todoConfig)
     );
 
     expect(store.todoEntityMap()).toBe(todoEntityMap);

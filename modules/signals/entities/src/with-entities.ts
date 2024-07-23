@@ -1,25 +1,26 @@
 import { computed, Signal } from '@angular/core';
 import {
+  EmptyFeatureResult,
   SignalStoreFeature,
   signalStoreFeature,
   withComputed,
   withState,
 } from '@ngrx/signals';
 import {
+  EntityComputed,
   EntityId,
   EntityMap,
-  EntitySignals,
   EntityState,
-  NamedEntitySignals,
+  NamedEntityComputed,
   NamedEntityState,
 } from './models';
 import { getEntityStateKeys } from './helpers';
 
 export function withEntities<Entity>(): SignalStoreFeature<
-  { state: {}; signals: {}; methods: {} },
+  EmptyFeatureResult,
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   }
 >;
@@ -27,20 +28,20 @@ export function withEntities<Entity, Collection extends string>(config: {
   entity: Entity;
   collection: Collection;
 }): SignalStoreFeature<
-  { state: {}; signals: {}; methods: {} },
+  EmptyFeatureResult,
   {
     state: NamedEntityState<Entity, Collection>;
-    signals: NamedEntitySignals<Entity, Collection>;
+    computed: NamedEntityComputed<Entity, Collection>;
     methods: {};
   }
 >;
 export function withEntities<Entity>(config: {
   entity: Entity;
 }): SignalStoreFeature<
-  { state: {}; signals: {}; methods: {} },
+  EmptyFeatureResult,
   {
     state: EntityState<Entity>;
-    signals: EntitySignals<Entity>;
+    computed: EntityComputed<Entity>;
     methods: {};
   }
 >;

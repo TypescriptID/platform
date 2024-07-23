@@ -9,56 +9,24 @@ const prettierConfig = resolveConfig.sync(__dirname);
 const RULE_MODULE = '@ngrx';
 const CONFIG_DIRECTORY = './modules/eslint-plugin/src/configs/';
 
-writeConfig('recommended', (rule) => !rule.meta.docs?.requiresTypeChecking);
 writeConfig('all', (_rule) => true);
-
+writeConfig('store', (rule) => rule.meta.ngrxModule === 'store');
+writeConfig('effects', (rule) => rule.meta.ngrxModule === 'effects');
 writeConfig(
-  'store-recommended',
-  (rule) =>
-    rule.meta.ngrxModule === 'store' && !rule.meta.docs?.requiresTypeChecking
-);
-writeConfig('store-all', (rule) => rule.meta.ngrxModule === 'store');
-
-writeConfig(
-  'effects-recommended',
-  (rule) =>
-    rule.meta.ngrxModule === 'effects' && !rule.meta.docs?.requiresTypeChecking
-);
-writeConfig('effects-all', (rule) => rule.meta.ngrxModule === 'effects');
-
-writeConfig(
-  'component-store-recommended',
-  (rule) =>
-    rule.meta.ngrxModule === 'component-store' &&
-    !rule.meta.docs?.requiresTypeChecking
-);
-
-writeConfig(
-  'component-store-all',
+  'component-store',
   (rule) => rule.meta.ngrxModule === 'component-store'
 );
-
-writeConfig(
-  'operators-recommended',
-  (rule) =>
-    rule.meta.ngrxModule === 'operators' &&
-    !rule.meta.docs?.requiresTypeChecking
-);
-
-writeConfig('operators-all', (rule) => rule.meta.ngrxModule === 'operators');
+writeConfig('operators', (rule) => rule.meta.ngrxModule === 'operators');
+writeConfig('signals', (rule) => rule.meta.ngrxModule === 'signals');
 
 function writeConfig(
   configName:
     | 'all'
-    | 'recommended'
-    | 'store-recommended'
-    | 'store-all'
-    | 'effects-recommended'
-    | 'effects-all'
-    | 'component-store-recommended'
-    | 'component-store-all'
-    | 'operators-recommended'
-    | 'operators-all',
+    | 'store'
+    | 'effects'
+    | 'component-store'
+    | 'operators'
+    | 'signals',
   predicate: (rule: NgRxRuleModule<[], string>) => boolean
 ) {
   const rulesForConfig = Object.entries(rulesForGenerate).filter(([_, rule]) =>
@@ -71,7 +39,7 @@ function writeConfig(
     },
     {}
   );
-  const parserOptions: null | Record<string, string | number> =
+  const requireParserOptions: null | Record<string, string | number> =
     rulesForConfig.some(([_, rule]) => rule.meta.docs?.requiresTypeChecking)
       ? {
           ecmaVersion: 2020,
@@ -107,8 +75,12 @@ function writeConfig(
         languageOptions: {
           parser,
           ${
-            parserOptions
-              ? `parserOptions: ${JSON.stringify(parserOptions, null, 2)},`
+            requireParserOptions
+              ? `parserOptions: ${JSON.stringify(
+                  requireParserOptions,
+                  null,
+                  2
+                )},`
               : ''
           }
         },
@@ -126,7 +98,7 @@ function writeConfig(
     plugins: ['@ngrx'],
     rules: configRules,
   };
-  if (configName.includes('all')) {
+  if (requireParserOptions) {
     jsonConfig.parserOptions = {
       ecmaVersion: 2020,
       sourceType: 'module',

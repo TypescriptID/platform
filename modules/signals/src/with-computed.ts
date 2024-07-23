@@ -1,33 +1,34 @@
-import { excludeKeys } from './helpers';
+import { assertUniqueStoreMembers } from './signal-store-assertions';
 import {
-  EmptyFeatureResult,
   InnerSignalStore,
   SignalsDictionary,
   SignalStoreFeature,
   SignalStoreFeatureResult,
-  SignalStoreSlices,
+  StateSignals,
 } from './signal-store-models';
 import { Prettify } from './ts-helpers';
 
 export function withComputed<
   Input extends SignalStoreFeatureResult,
-  Signals extends SignalsDictionary
+  ComputedSignals extends SignalsDictionary
 >(
   signalsFactory: (
-    store: Prettify<SignalStoreSlices<Input['state']> & Input['signals']>
-  ) => Signals
-): SignalStoreFeature<Input, EmptyFeatureResult & { signals: Signals }> {
+    store: Prettify<StateSignals<Input['state']> & Input['computed']>
+  ) => ComputedSignals
+): SignalStoreFeature<
+  Input,
+  { state: {}; computed: ComputedSignals; methods: {} }
+> {
   return (store) => {
-    const signals = signalsFactory({ ...store.slices, ...store.signals });
-    const signalsKeys = Object.keys(signals);
-    const slices = excludeKeys(store.slices, signalsKeys);
-    const methods = excludeKeys(store.methods, signalsKeys);
+    const computedSignals = signalsFactory({
+      ...store.stateSignals,
+      ...store.computedSignals,
+    });
+    assertUniqueStoreMembers(store, Object.keys(computedSignals));
 
     return {
       ...store,
-      slices,
-      signals: { ...store.signals, ...signals },
-      methods,
-    } as InnerSignalStore<Record<string, unknown>, Signals>;
+      computedSignals: { ...store.computedSignals, ...computedSignals },
+    } as InnerSignalStore<Record<string, unknown>, ComputedSignals>;
   };
 }

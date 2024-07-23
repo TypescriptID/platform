@@ -1,10 +1,16 @@
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { addEntities, removeEntity, withEntities } from '../../src';
+import {
+  addEntities,
+  entityConfig,
+  removeEntity,
+  withEntities,
+} from '../../src';
 import { Todo, todo1, todo2, todo3, User, user1, user2 } from '../mocks';
+import { selectTodoId } from '../helpers';
 
 describe('removeEntity', () => {
   it('removes entity', () => {
-    const Store = signalStore(withEntities<User>());
+    const Store = signalStore({ protectedState: false }, withEntities<User>());
     const store = new Store();
 
     patchState(store, addEntities([user1, user2]), removeEntity(user1.id));
@@ -15,10 +21,10 @@ describe('removeEntity', () => {
   });
 
   it('does not modify entity state if entity does not exist', () => {
-    const Store = signalStore(withEntities<Todo>());
+    const Store = signalStore({ protectedState: false }, withEntities<Todo>());
     const store = new Store();
 
-    patchState(store, addEntities([todo2, todo3], { idKey: '_id' }));
+    patchState(store, addEntities([todo2, todo3], { selectId: selectTodoId }));
 
     const entityMap = store.entityMap();
     const ids = store.ids();
@@ -36,26 +42,29 @@ describe('removeEntity', () => {
   });
 
   it('removes entity from specified collection', () => {
-    const todoMeta = {
+    const todoConfig = entityConfig({
       entity: type<Todo>(),
       collection: 'todo',
-      idKey: '_id',
-    } as const;
+      selectId: selectTodoId,
+    });
 
-    const Store = signalStore(withEntities(todoMeta));
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities(todoConfig)
+    );
     const store = new Store();
 
     patchState(
       store,
-      addEntities([todo1, todo2, todo3], todoMeta),
-      removeEntity(todo1._id, todoMeta)
+      addEntities([todo1, todo2, todo3], todoConfig),
+      removeEntity(todo1._id, todoConfig)
     );
 
     expect(store.todoEntityMap()).toEqual({ y: todo2, z: todo3 });
     expect(store.todoIds()).toEqual(['y', 'z']);
     expect(store.todoEntities()).toEqual([todo2, todo3]);
 
-    patchState(store, removeEntity(todo2._id, todoMeta));
+    patchState(store, removeEntity(todo2._id, todoConfig));
 
     expect(store.todoEntityMap()).toEqual({ z: todo3 });
     expect(store.todoIds()).toEqual(['z']);
@@ -64,6 +73,7 @@ describe('removeEntity', () => {
 
   it('does not modify entity state if entity does not exist in specified collection', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity: type<User>(),
         collection: 'user',

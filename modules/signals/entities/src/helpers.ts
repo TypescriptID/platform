@@ -4,10 +4,16 @@ import {
   EntityId,
   EntityPredicate,
   EntityState,
+  SelectEntityId,
 } from './models';
 
-export function getEntityIdKey(config?: { idKey?: string }): string {
-  return config?.idKey ?? 'id';
+declare const ngDevMode: unknown;
+const defaultSelectId: SelectEntityId<{ id: EntityId }> = (entity) => entity.id;
+
+export function getEntityIdSelector(config?: {
+  selectId?: SelectEntityId<any>;
+}): SelectEntityId<any> {
+  return config?.selectId ?? defaultSelectId;
 }
 
 export function getEntityStateKeys(config?: { collection?: string }): {
@@ -65,9 +71,9 @@ export function getEntityUpdaterResult(
 export function addEntityMutably(
   state: EntityState<any>,
   entity: any,
-  idKey: string
+  selectId: SelectEntityId<any>
 ): DidMutate {
-  const id = entity[idKey];
+  const id = selectId(entity);
 
   if (state.entityMap[id]) {
     return DidMutate.None;
@@ -82,12 +88,12 @@ export function addEntityMutably(
 export function addEntitiesMutably(
   state: EntityState<any>,
   entities: any[],
-  idKey: string
+  selectId: SelectEntityId<any>
 ): DidMutate {
   let didMutate = DidMutate.None;
 
   for (const entity of entities) {
-    const result = addEntityMutably(state, entity, idKey);
+    const result = addEntityMutably(state, entity, selectId);
 
     if (result === DidMutate.Both) {
       didMutate = result;
@@ -100,9 +106,9 @@ export function addEntitiesMutably(
 export function setEntityMutably(
   state: EntityState<any>,
   entity: any,
-  idKey: string
+  selectId: SelectEntityId<any>
 ): DidMutate {
-  const id = entity[idKey];
+  const id = selectId(entity);
 
   if (state.entityMap[id]) {
     state.entityMap[id] = entity;
@@ -118,12 +124,12 @@ export function setEntityMutably(
 export function setEntitiesMutably(
   state: EntityState<any>,
   entities: any[],
-  idKey: string
+  selectId: SelectEntityId<any>
 ): DidMutate {
   let didMutate = DidMutate.None;
 
   for (const entity of entities) {
-    const result = setEntityMutably(state, entity, idKey);
+    const result = setEntityMutably(state, entity, selectId);
 
     if (didMutate === DidMutate.Both) {
       continue;
@@ -161,11 +167,13 @@ export function removeEntitiesMutably(
 export function updateEntitiesMutably(
   state: EntityState<any>,
   idsOrPredicate: EntityId[] | EntityPredicate<any>,
-  changes: EntityChanges<any>
+  changes: EntityChanges<any>,
+  selectId: SelectEntityId<any>
 ): DidMutate {
   const ids = Array.isArray(idsOrPredicate)
     ? idsOrPredicate
     : state.ids.filter((id) => idsOrPredicate(state.entityMap[id]));
+  let newIds: Record<EntityId, EntityId> | undefined = undefined;
   let didMutate = DidMutate.None;
 
   for (const id of ids) {
@@ -176,7 +184,31 @@ export function updateEntitiesMutably(
         typeof changes === 'function' ? changes(entity) : changes;
       state.entityMap[id] = { ...entity, ...changesRecord };
       didMutate = DidMutate.Entities;
+
+      const newId = selectId(state.entityMap[id]);
+      if (newId !== id) {
+        state.entityMap[newId] = state.entityMap[id];
+        delete state.entityMap[id];
+
+        newIds = newIds || {};
+        newIds[id] = newId;
+      }
     }
+  }
+
+  if (newIds) {
+    state.ids = state.ids.map((id) => newIds[id] ?? id);
+    didMutate = DidMutate.Both;
+  }
+
+  if (ngDevMode && state.ids.length !== Object.keys(state.entityMap).length) {
+    console.warn(
+      '@ngrx/signals/entities: Entities with IDs:',
+      ids,
+      'are not updated correctly.',
+      'Make sure to apply valid changes when using `updateEntity`,',
+      '`updateEntities`, and `updateAllEntities` updaters.'
+    );
   }
 
   return didMutate;

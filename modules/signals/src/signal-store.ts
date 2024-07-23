@@ -1,203 +1,70 @@
 import { DestroyRef, inject, Injectable, signal, Type } from '@angular/core';
-import { STATE_SIGNAL, StateSignal } from './state-signal';
+import { STATE_SOURCE, StateSource, WritableStateSource } from './state-source';
 import {
   EmptyFeatureResult,
   InnerSignalStore,
-  MergeFeatureResults,
-  SignalStoreConfig,
   SignalStoreFeature,
   SignalStoreFeatureResult,
-  SignalStoreProps,
+  StateSignals,
 } from './signal-store-models';
 import { Prettify } from './ts-helpers';
 
-export function signalStore<F1 extends SignalStoreFeatureResult>(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>
-): Type<SignalStoreProps<F1> & StateSignal<Prettify<F1['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2]>
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3]>
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3, F4]>
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  F5 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3, F4, F5]>
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  F5 extends SignalStoreFeatureResult,
-  F6 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6]
-  >
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  F5 extends SignalStoreFeatureResult,
-  F6 extends SignalStoreFeatureResult,
-  F7 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7]
-  >
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  F5 extends SignalStoreFeatureResult,
-  F6 extends SignalStoreFeatureResult,
-  F7 extends SignalStoreFeatureResult,
-  F8 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7, F8]
-  >
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>,
-  f8: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7]>, F8>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
-export function signalStore<
-  F1 extends SignalStoreFeatureResult,
-  F2 extends SignalStoreFeatureResult,
-  F3 extends SignalStoreFeatureResult,
-  F4 extends SignalStoreFeatureResult,
-  F5 extends SignalStoreFeatureResult,
-  F6 extends SignalStoreFeatureResult,
-  F7 extends SignalStoreFeatureResult,
-  F8 extends SignalStoreFeatureResult,
-  F9 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7, F8, F9]
-  >
->(
-  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
-  f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>,
-  f8: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7]>, F8>,
-  f9: SignalStoreFeature<
-    MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7, F8]>,
-    F9
-  >
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+type SignalStoreConfig = { providedIn?: 'root'; protectedState?: boolean };
+
+type SignalStoreMembers<FeatureResult extends SignalStoreFeatureResult> =
+  Prettify<
+    StateSignals<FeatureResult['state']> &
+      FeatureResult['computed'] &
+      FeatureResult['methods']
+  >;
 
 export function signalStore<F1 extends SignalStoreFeatureResult>(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>
-): Type<SignalStoreProps<F1> & StateSignal<Prettify<F1['state']>>>;
+): Type<SignalStoreMembers<F1> & StateSource<Prettify<F1['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2]>
+  R extends SignalStoreFeatureResult = F1 & F2
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
   F3 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3]>
+  R extends SignalStoreFeatureResult = F1 & F2 & F3
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
   F3 extends SignalStoreFeatureResult,
   F4 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3, F4]>
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
   F3 extends SignalStoreFeatureResult,
   F4 extends SignalStoreFeatureResult,
   F5 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<[F1, F2, F3, F4, F5]>
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
@@ -205,18 +72,15 @@ export function signalStore<
   F4 extends SignalStoreFeatureResult,
   F5 extends SignalStoreFeatureResult,
   F6 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6]
-  >
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
@@ -225,19 +89,16 @@ export function signalStore<
   F5 extends SignalStoreFeatureResult,
   F6 extends SignalStoreFeatureResult,
   F7 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7]
-  >
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
@@ -247,20 +108,17 @@ export function signalStore<
   F6 extends SignalStoreFeatureResult,
   F7 extends SignalStoreFeatureResult,
   F8 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7, F8]
-  >
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>,
-  f8: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7]>, F8>
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
 export function signalStore<
   F1 extends SignalStoreFeatureResult,
   F2 extends SignalStoreFeatureResult,
@@ -271,34 +129,1185 @@ export function signalStore<
   F7 extends SignalStoreFeatureResult,
   F8 extends SignalStoreFeatureResult,
   F9 extends SignalStoreFeatureResult,
-  R extends SignalStoreFeatureResult = MergeFeatureResults<
-    [F1, F2, F3, F4, F5, F6, F7, F8, F9]
-  >
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9
 >(
-  config: SignalStoreConfig,
   f1: SignalStoreFeature<EmptyFeatureResult, F1>,
   f2: SignalStoreFeature<{} & F1, F2>,
-  f3: SignalStoreFeature<MergeFeatureResults<[F1, F2]>, F3>,
-  f4: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3]>, F4>,
-  f5: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4]>, F5>,
-  f6: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5]>, F6>,
-  f7: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6]>, F7>,
-  f8: SignalStoreFeature<MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7]>, F8>,
-  f9: SignalStoreFeature<
-    MergeFeatureResults<[F1, F2, F3, F4, F5, F6, F7, F8]>,
-    F9
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10, F11>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
   >
-): Type<SignalStoreProps<R> & StateSignal<Prettify<R['state']>>>;
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  F15 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14 &
+    F15
+>(
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >,
+  f15: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13 & F14,
+    F15
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+
+export function signalStore<F1 extends SignalStoreFeatureResult>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>
+): Type<SignalStoreMembers<F1> & StateSource<Prettify<F1['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10, F11>
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  F15 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14 &
+    F15
+>(
+  config: { providedIn?: 'root'; protectedState?: true },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >,
+  f15: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13 & F14,
+    F15
+  >
+): Type<SignalStoreMembers<R> & StateSource<Prettify<R['state']>>>;
+
+export function signalStore<F1 extends SignalStoreFeatureResult>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>
+): Type<SignalStoreMembers<F1> & WritableStateSource<Prettify<F1['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10, F11>
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
+export function signalStore<
+  F1 extends SignalStoreFeatureResult,
+  F2 extends SignalStoreFeatureResult,
+  F3 extends SignalStoreFeatureResult,
+  F4 extends SignalStoreFeatureResult,
+  F5 extends SignalStoreFeatureResult,
+  F6 extends SignalStoreFeatureResult,
+  F7 extends SignalStoreFeatureResult,
+  F8 extends SignalStoreFeatureResult,
+  F9 extends SignalStoreFeatureResult,
+  F10 extends SignalStoreFeatureResult,
+  F11 extends SignalStoreFeatureResult,
+  F12 extends SignalStoreFeatureResult,
+  F13 extends SignalStoreFeatureResult,
+  F14 extends SignalStoreFeatureResult,
+  F15 extends SignalStoreFeatureResult,
+  R extends SignalStoreFeatureResult = F1 &
+    F2 &
+    F3 &
+    F4 &
+    F5 &
+    F6 &
+    F7 &
+    F8 &
+    F9 &
+    F10 &
+    F11 &
+    F12 &
+    F13 &
+    F14 &
+    F15
+>(
+  config: { providedIn?: 'root'; protectedState: false },
+  f1: SignalStoreFeature<EmptyFeatureResult, F1>,
+  f2: SignalStoreFeature<{} & F1, F2>,
+  f3: SignalStoreFeature<F1 & F2, F3>,
+  f4: SignalStoreFeature<F1 & F2 & F3, F4>,
+  f5: SignalStoreFeature<F1 & F2 & F3 & F4, F5>,
+  f6: SignalStoreFeature<F1 & F2 & F3 & F4 & F5, F6>,
+  f7: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6, F7>,
+  f8: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7, F8>,
+  f9: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8, F9>,
+  f10: SignalStoreFeature<F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9, F10>,
+  f11: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10,
+    F11
+  >,
+  f12: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11,
+    F12
+  >,
+  f13: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12,
+    F13
+  >,
+  f14: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13,
+    F14
+  >,
+  f15: SignalStoreFeature<
+    F1 & F2 & F3 & F4 & F5 & F6 & F7 & F8 & F9 & F10 & F11 & F12 & F13 & F14,
+    F15
+  >
+): Type<SignalStoreMembers<R> & WritableStateSource<Prettify<R['state']>>>;
 
 export function signalStore(
   ...args: [SignalStoreConfig, ...SignalStoreFeature[]] | SignalStoreFeature[]
-): Type<SignalStoreProps<any>> {
+): Type<SignalStoreMembers<any>> {
   const signalStoreArgs = [...args];
 
-  const config: Partial<SignalStoreConfig> =
-    'providedIn' in signalStoreArgs[0]
-      ? (signalStoreArgs.shift() as SignalStoreConfig)
-      : {};
+  const config =
+    typeof signalStoreArgs[0] === 'function'
+      ? {}
+      : (signalStoreArgs.shift() as SignalStoreConfig);
   const features = signalStoreArgs as SignalStoreFeature[];
 
   @Injectable({ providedIn: config.providedIn || null })
@@ -308,13 +1317,16 @@ export function signalStore(
         (store, feature) => feature(store),
         getInitialInnerStore()
       );
-      const { slices, signals, methods, hooks } = innerStore;
-      const props = { ...slices, ...signals, ...methods };
+      const { stateSignals, computedSignals, methods, hooks } = innerStore;
+      const storeMembers = { ...stateSignals, ...computedSignals, ...methods };
 
-      (this as any)[STATE_SIGNAL] = innerStore[STATE_SIGNAL];
+      (this as any)[STATE_SOURCE] =
+        config.protectedState === false
+          ? innerStore[STATE_SOURCE]
+          : innerStore[STATE_SOURCE].asReadonly();
 
-      for (const key in props) {
-        (this as any)[key] = props[key];
+      for (const key in storeMembers) {
+        (this as any)[key] = storeMembers[key];
       }
 
       const { onInit, onDestroy } = hooks;
@@ -334,9 +1346,9 @@ export function signalStore(
 
 export function getInitialInnerStore(): InnerSignalStore {
   return {
-    [STATE_SIGNAL]: signal({}),
-    slices: {},
-    signals: {},
+    [STATE_SOURCE]: signal({}),
+    stateSignals: {},
+    computedSignals: {},
     methods: {},
     hooks: {},
   };

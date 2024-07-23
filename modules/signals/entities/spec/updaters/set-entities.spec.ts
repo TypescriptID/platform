@@ -1,10 +1,11 @@
 import { patchState, signalStore, type } from '@ngrx/signals';
-import { setEntities, withEntities } from '../../src';
+import { entityConfig, setEntities, withEntities } from '../../src';
 import { Todo, todo1, todo2, todo3, User, user1, user2, user3 } from '../mocks';
+import { selectTodoId as selectId } from '../helpers';
 
 describe('setEntities', () => {
   it('adds entities if they do not exist', () => {
-    const Store = signalStore(withEntities<User>());
+    const Store = signalStore({ protectedState: false }, withEntities<User>());
     const store = new Store();
 
     patchState(store, setEntities([user1]));
@@ -21,7 +22,7 @@ describe('setEntities', () => {
   });
 
   it('replaces entities if they already exist', () => {
-    const Store = signalStore(withEntities<User>());
+    const Store = signalStore({ protectedState: false }, withEntities<User>());
     const store = new Store();
 
     patchState(
@@ -60,6 +61,7 @@ describe('setEntities', () => {
 
   it('adds entities to the specified collection if they do not exist', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity: type<User>(),
         collection: 'user',
@@ -80,6 +82,7 @@ describe('setEntities', () => {
 
   it('replaces entities to the specified collection if they already exist', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity: type<User>(),
         collection: 'user',
@@ -115,11 +118,11 @@ describe('setEntities', () => {
     ]);
   });
 
-  it('adds entities with the specified idKey if they do not exist', () => {
-    const Store = signalStore(withEntities<Todo>());
+  it('adds entities with a custom id if they do not exist', () => {
+    const Store = signalStore({ protectedState: false }, withEntities<Todo>());
     const store = new Store();
 
-    patchState(store, setEntities([todo2, todo3], { idKey: '_id' }));
+    patchState(store, setEntities([todo2, todo3], { selectId }));
 
     expect(store.entityMap()).toEqual({ y: todo2, z: todo3 });
     expect(store.ids()).toEqual(['y', 'z']);
@@ -127,8 +130,8 @@ describe('setEntities', () => {
 
     patchState(
       store,
-      setEntities([todo1], { idKey: '_id' }),
-      setEntities([] as Todo[], { idKey: '_id' })
+      setEntities([todo1], { selectId }),
+      setEntities([] as Todo[], { selectId })
     );
 
     expect(store.entityMap()).toEqual({ y: todo2, z: todo3, x: todo1 });
@@ -136,22 +139,22 @@ describe('setEntities', () => {
     expect(store.entities()).toEqual([todo2, todo3, todo1]);
   });
 
-  it('replaces entities with the specified idKey if they already exist', () => {
-    const Store = signalStore(withEntities<Todo>());
+  it('replaces entities with a custom id if they already exist', () => {
+    const Store = signalStore({ protectedState: false }, withEntities<Todo>());
     const store = new Store();
 
     patchState(
       store,
-      setEntities([todo1], { idKey: '_id' }),
-      setEntities([todo2, { ...todo1, text: 'Signals' }], { idKey: '_id' }),
-      setEntities([] as Todo[], { idKey: '_id' })
+      setEntities([todo1], { selectId }),
+      setEntities([todo2, { ...todo1, text: 'Signals' }], { selectId }),
+      setEntities([] as Todo[], { selectId })
     );
 
     patchState(
       store,
-      setEntities([] as Todo[], { idKey: '_id' }),
+      setEntities([] as Todo[], { selectId }),
       setEntities([todo3, todo2, { ...todo2, text: 'NgRx' }, todo1], {
-        idKey: '_id',
+        selectId,
       })
     );
 
@@ -168,8 +171,9 @@ describe('setEntities', () => {
     ]);
   });
 
-  it('adds entities with the specified idKey to the specified collection if they do not exist', () => {
+  it('adds entities with a custom id to the specified collection if they do not exist', () => {
     const Store = signalStore(
+      { protectedState: false },
       withEntities({
         entity: type<Todo>(),
         collection: 'todo',
@@ -181,7 +185,7 @@ describe('setEntities', () => {
       store,
       setEntities([todo3, todo2], {
         collection: 'todo',
-        idKey: '_id',
+        selectId,
       })
     );
 
@@ -191,8 +195,8 @@ describe('setEntities', () => {
 
     patchState(
       store,
-      setEntities([todo1], { collection: 'todo', idKey: '_id' }),
-      setEntities([] as Todo[], { collection: 'todo', idKey: '_id' })
+      setEntities([todo1], { collection: 'todo', selectId }),
+      setEntities([] as Todo[], { collection: 'todo', selectId })
     );
 
     expect(store.todoEntityMap()).toEqual({ z: todo3, y: todo2, x: todo1 });
@@ -200,21 +204,27 @@ describe('setEntities', () => {
     expect(store.todoEntities()).toEqual([todo3, todo2, todo1]);
   });
 
-  it('replaces entities with the specified idKey to the specified collection if they already exist', () => {
-    const todoMeta = {
+  it('replaces entities with a custom id to the specified collection if they already exist', () => {
+    const todoConfig = entityConfig({
       entity: type<Todo>(),
       collection: 'todo',
-      idKey: '_id',
-    } as const;
+      selectId,
+    });
 
-    const Store = signalStore(withEntities(todoMeta));
+    const Store = signalStore(
+      { protectedState: false },
+      withEntities(todoConfig)
+    );
     const store = new Store();
 
     patchState(
       store,
-      setEntities([todo2, { ...todo2, text: 'NgRx' }, todo3, todo2], todoMeta),
-      setEntities([] as Todo[], todoMeta),
-      setEntities([todo3, { ...todo3, text: 'NgRx' }, todo1], todoMeta)
+      setEntities(
+        [todo2, { ...todo2, text: 'NgRx' }, todo3, todo2],
+        todoConfig
+      ),
+      setEntities([] as Todo[], todoConfig),
+      setEntities([todo3, { ...todo3, text: 'NgRx' }, todo1], todoConfig)
     );
 
     expect(store.todoEntityMap()).toEqual({

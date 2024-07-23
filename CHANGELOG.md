@@ -1,3 +1,72 @@
+<a name="18.0.1"></a>
+
+## [18.0.1](https://github.com/ngrx/platform/compare/18.0.0...18.0.1) (2024-06-27)
+
+### Bug Fixes
+
+- **component-store:** resolve issues in migration script to v18 ([#4403](https://github.com/ngrx/platform/issues/4403)) ([a15d53e](https://github.com/ngrx/platform/commit/a15d53e))
+- **effects:** fix bugs in migration script to v18 ([#4402](https://github.com/ngrx/platform/issues/4402)) ([6ae4723](https://github.com/ngrx/platform/commit/6ae4723))
+- **eslint-plugin:** only take return statement into account with no-multiple-actions-in-effects ([#4410](https://github.com/ngrx/platform/issues/4410)) ([c9c646c](https://github.com/ngrx/platform/commit/c9c646c)), closes [#4409](https://github.com/ngrx/platform/issues/4409)
+
+### Features
+
+- **signals:** rename signals to computed when defining custom features with input ([#4395](https://github.com/ngrx/platform/issues/4395)) ([05f0940](https://github.com/ngrx/platform/commit/05f0940)), closes [#4391](https://github.com/ngrx/platform/issues/4391)
+- **signals:** replace `idKey` with `selectId` when defining custom entity ID ([#4396](https://github.com/ngrx/platform/issues/4396)) ([67a5a93](https://github.com/ngrx/platform/commit/67a5a93)), closes [#4217](https://github.com/ngrx/platform/issues/4217) [#4392](https://github.com/ngrx/platform/issues/4392)
+
+<a name="18.0.1"></a>
+
+## [18.0.1](https://github.com/ngrx/platform/compare/18.0.0...18.0.1) (2024-06-27)
+
+<a name="18.0.0"></a>
+
+# [18.0.0](https://github.com/ngrx/platform/compare/18.0.0-rc.1...18.0.0) (2024-06-13)
+
+<a name="18.0.0-rc.1"></a>
+
+# [18.0.0-rc.1](https://github.com/ngrx/platform/compare/18.0.0-rc.0...18.0.0-rc.1) (2024-06-12)
+
+### Bug Fixes
+
+- **eslint-plugin:** include signals to ESLint v8 rules ([#4387](https://github.com/ngrx/platform/issues/4387)) ([7c75dcf](https://github.com/ngrx/platform/commit/7c75dcf)), closes [#4385](https://github.com/ngrx/platform/issues/4385)
+
+<a name="18.0.0-rc.0"></a>
+
+# [18.0.0-rc.0](https://github.com/ngrx/platform/compare/18.0.0-beta.1...18.0.0-rc.0) (2024-06-10)
+
+### Bug Fixes
+
+- **router-store:** include string[] as return type for selectQueryParam ([#4369](https://github.com/ngrx/platform/issues/4369)) ([b0b43f7](https://github.com/ngrx/platform/commit/b0b43f7))
+- **signals:** export DeepSignal ([#4377](https://github.com/ngrx/platform/issues/4377)) ([fa26c5c](https://github.com/ngrx/platform/commit/fa26c5c))
+
+### Features
+
+- **component-store:** remove tapResponse operator ([#4366](https://github.com/ngrx/platform/issues/4366)) ([285c810](https://github.com/ngrx/platform/commit/285c810))
+- **effects:** remove concatLatestFrom operator ([#4367](https://github.com/ngrx/platform/issues/4367)) ([1a1b6df](https://github.com/ngrx/platform/commit/1a1b6df))
+- **eslint-plugin:** add signals rules ([#4380](https://github.com/ngrx/platform/issues/4380)) ([c002466](https://github.com/ngrx/platform/commit/c002466))
+- **eslint-plugin:** support ESLint v9 (and v8) ([#4371](https://github.com/ngrx/platform/issues/4371)) ([e8d9ffa](https://github.com/ngrx/platform/commit/e8d9ffa))
+
+### BREAKING CHANGES
+
+- **effects:** The concatLatestFrom operator has been removed from @ngrx/effects in favor of the @ngrx/operators package.
+
+BEFORE:
+
+import { concatLatestFrom } from '@ngrx/effects';
+
+AFTER:
+
+import { concatLatestFrom } from '@ngrx/operators';
+
+- **component-store:** The tapResponse operator has been removed from @ngrx/component-store in favor of the @ngrx/operators package.
+
+BEFORE:
+
+import { tapResponse } from '@ngrx/component-store';
+
+AFTER:
+
+import { tapResponse } from '@ngrx/operators';
+
 <a name="18.0.0-beta.1"></a>
 
 # [18.0.0-beta.1](https://github.com/ngrx/platform/compare/18.0.0-beta.0...18.0.0-beta.1) (2024-05-20)

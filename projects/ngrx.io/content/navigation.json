@@ -292,7 +292,11 @@
                 {
                   "title": "Lifecycle Hooks",
                   "url": "guide/signals/signal-store/lifecycle-hooks"
-                },                
+                },
+                {
+                  "title": "State Tracking",
+                  "url": "guide/signals/signal-store/state-tracking"
+                },
                 {
                   "title": "Custom Store Features",
                   "url": "guide/signals/signal-store/custom-store-features"
@@ -553,6 +557,10 @@
       "title": "Migrations",
       "children": [
         {
+          "title": "V18",
+          "url": "guide/migration/v18"
+        },
+        {
           "title": "V17",
           "url": "guide/migration/v17"
         },
@@ -696,6 +704,10 @@
     }
   ],
   "docVersions": [
+    {
+      "title": "v17",
+      "url": "https://v17.ngrx.io"
+    },
     {
       "title": "v16",
       "url": "https://v16.ngrx.io"

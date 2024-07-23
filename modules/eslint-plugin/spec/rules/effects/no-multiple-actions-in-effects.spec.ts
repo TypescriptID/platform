@@ -64,6 +64,54 @@ export class Effects {
     )
   }
 }`,
+  `
+export const saveSearchCriteria$ = createEffect(
+  (actions$ = inject(Actions$), store = inject(Store), saveLoadService = inject(SaveLoadService)) => {
+    return actions$.pipe(
+      ofType(SearchCriteriaActions.save),
+      concatLatestFrom(() => store.select(inventoryFeature.selectInventoryItems)),
+      concatMap(([{ searchCriteriaName }, inventoryItems]) => {
+        const tags = Object.keys(inventoryItems)
+          .filter((inventoryType) => {
+            const [, inventorySearchType] = splitInventoryType(inventoryType as InventoryType);
+            return inventorySearchType === 'costCenter' || inventorySearchType === 'wbs';
+          })
+          .map((inventoryType) => splitInventoryType(inventoryType as InventoryType))
+          .map(([value, type]) => ({ value, type }));
+        return saveLoadService.saveSearch(searchCriteriaName, tags, false).pipe(
+          map(() => SearchCriteriaActions.saveSucceeded()),
+          catchError((error: Error) => {
+            if (error instanceof HttpErrorResponse && error.status === 409) {
+              return of(SearchCriteriaActions.saveAlreadyExists({ searchCriteriaName, tags }));
+            }
+
+            return defaultErrorHandler(error, 'inventoryDomain.messages.saveSearchFailed', SearchCriteriaActions.saveFailed());
+          })
+        );
+      })
+    );
+  },
+  { functional: true }
+);
+  `,
+  `
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createAction, props } from '@ngrx/store';
+import { of, switchMap } from 'rxjs';
+const foo = createAction('foo', props<{ payload: string }>());
+const bar = createAction('bar');
+const baz = createAction('baz');
+
+@Injectable()
+export class Effects {
+  constructor(private actions$: Actions) {}
+  effect$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(foo),
+            switchMap(({ payload }: { payload: string }) => (payload === 'value' ? of(bar()) : of(baz()))),
+        ),
+    );
+}`,
 ];
 
 const invalid: () => RunTests['invalid'] = () => [

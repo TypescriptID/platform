@@ -6,6 +6,7 @@ describe('signalStore', () => {
     (code) => `
         import { computed, inject, Signal } from '@angular/core';
         import {
+          getState,
           patchState,
           signalStore,
           signalStoreFeature,
@@ -33,7 +34,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'Store',
-      'Type<{ foo: Signal<string>; bar: Signal<number[]>; } & StateSignal<{ foo: string; bar: number[]; }>>'
+      'Type<{ foo: Signal<string>; bar: Signal<number[]>; } & StateSource<{ foo: string; bar: number[]; }>>'
     );
   });
 
@@ -63,7 +64,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ user: DeepSignal<{ age: number; details: { first: string; flags: boolean[]; }; }>; } & StateSignal<{ user: { age: number; details: { first: string; flags: boolean[]; }; }; }>'
+      '{ user: DeepSignal<{ age: number; details: { first: string; flags: boolean[]; }; }>; } & StateSource<{ user: { age: number; details: { first: string; flags: boolean[]; }; }; }>'
     );
 
     expectSnippet(snippet).toInfer(
@@ -203,7 +204,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toSucceed();
 
-    expectSnippet(snippet).toInfer('Store', 'Type<{} & StateSignal<{}>>');
+    expectSnippet(snippet).toInfer('Store', 'Type<{} & StateSource<{}>>');
   });
 
   it('succeeds when state slices are union types', () => {
@@ -234,7 +235,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ foo: Signal<number | { s: string; }>; bar: DeepSignal<{ baz: { b: boolean; } | null; }>; x: DeepSignal<{ y: { z: number | undefined; }; }>; } & StateSignal<{ foo: number | { ...; }; bar: { ...; }; x: { ...; }; }>'
+      '{ foo: Signal<number | { s: string; }>; bar: DeepSignal<{ baz: { b: boolean; } | null; }>; x: DeepSignal<{ y: { z: number | undefined; }; }>; } & StateSource<{ foo: number | { ...; }; bar: { ...; }; x: { ...; }; }>'
     );
 
     expectSnippet(snippet).toInfer('foo', 'Signal<number | { s: string; }>');
@@ -274,7 +275,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet1).toInfer(
       'Store',
-      'Type<{ name: DeepSignal<{ x: { y: string; }; }>; arguments: Signal<number[]>; call: Signal<boolean>; } & StateSignal<{ name: { x: { y: string; }; }; arguments: number[]; call: boolean; }>>'
+      'Type<{ name: DeepSignal<{ x: { y: string; }; }>; arguments: Signal<number[]>; call: Signal<boolean>; } & StateSource<{ name: { x: { y: string; }; }; arguments: number[]; call: boolean; }>>'
     );
 
     const snippet2 = `
@@ -291,7 +292,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet2).toInfer(
       'Store',
-      'Type<{ apply: Signal<string>; bind: DeepSignal<{ foo: string; }>; prototype: Signal<string[]>; } & StateSignal<{ apply: string; bind: { foo: string; }; prototype: string[]; }>>'
+      'Type<{ apply: Signal<string>; bind: DeepSignal<{ foo: string; }>; prototype: Signal<string[]>; } & StateSource<{ apply: string; bind: { foo: string; }; prototype: string[]; }>>'
     );
 
     const snippet3 = `
@@ -307,7 +308,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet3).toInfer(
       'Store',
-      'Type<{ length: Signal<number>; caller: Signal<undefined>; } & StateSignal<{ length: number; caller: undefined; }>>'
+      'Type<{ length: Signal<number>; caller: Signal<undefined>; } & StateSource<{ length: number; caller: undefined; }>>'
     );
   });
 
@@ -362,7 +363,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ bar: DeepSignal<{ baz?: number | undefined; }>; x: DeepSignal<{ y?: { z: boolean; } | undefined; }>; } & StateSignal<{ bar: { baz?: number | undefined; }; x: { y?: { z: boolean; } | undefined; }; }>'
+      '{ bar: DeepSignal<{ baz?: number | undefined; }>; x: DeepSignal<{ y?: { z: boolean; } | undefined; }>; } & StateSource<{ bar: { baz?: number | undefined; }; x: { y?: { z: boolean; } | undefined; }; }>'
     );
 
     expectSnippet(snippet).toInfer(
@@ -453,6 +454,134 @@ describe('signalStore', () => {
     expectSnippet(`const Store = signalStore(withState(true));`).toFail();
   });
 
+  it('exposes readonly state source when protectedState is not provided', () => {
+    const snippet = `
+      const CounterStore1 = signalStore(withState({ count: 0 }));
+      const CounterStore2 = signalStore(
+        { providedIn: 'root' },
+        withState({ count: 0 })
+      );
+
+      const store1 = new CounterStore1();
+      const state1 = getState(store1);
+
+      const store2 = new CounterStore2();
+      const state2 = getState(store2);
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer(
+      'store1',
+      '{ count: Signal<number>; } & StateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state1', '{ count: number; }');
+
+    expectSnippet(`
+      ${snippet}
+      patchState(store1, { count: 1 });
+    `).toFail();
+
+    expectSnippet(snippet).toInfer(
+      'store2',
+      '{ count: Signal<number>; } & StateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state2', '{ count: number; }');
+
+    expectSnippet(`
+      ${snippet}
+      patchState(store2, { count: 1 });
+    `).toFail();
+  });
+
+  it('exposes readonly state source when protectedState is true', () => {
+    const snippet = `
+      const CounterStore1 = signalStore(
+        { protectedState: true },
+        withState({ count: 0 })
+      );
+      const CounterStore2 = signalStore(
+        { providedIn: 'root', protectedState: true },
+        withState({ count: 0 })
+      );
+
+      const store1 = new CounterStore1();
+      const state1 = getState(store1);
+
+      const store2 = new CounterStore2();
+      const state2 = getState(store2);
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer(
+      'store1',
+      '{ count: Signal<number>; } & StateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state1', '{ count: number; }');
+
+    expectSnippet(`
+      ${snippet}
+      patchState(store1, { count: 10 });
+    `).toFail();
+
+    expectSnippet(snippet).toInfer(
+      'store2',
+      '{ count: Signal<number>; } & StateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state2', '{ count: number; }');
+
+    expectSnippet(`
+      ${snippet}
+      patchState(store2, { count: 10 });
+    `).toFail();
+  });
+
+  it('exposes writable state source when protectedState is false', () => {
+    const snippet = `
+      const CounterStore1 = signalStore(
+        { protectedState: false },
+        withState({ count: 0 })
+      );
+      const CounterStore2 = signalStore(
+        { providedIn: 'root', protectedState: false },
+        withState({ count: 0 })
+      );
+
+      const store1 = new CounterStore1();
+      const state1 = getState(store1);
+
+      const store2 = new CounterStore2();
+      const state2 = getState(store2);
+    `;
+
+    expectSnippet(snippet).toSucceed();
+
+    expectSnippet(snippet).toInfer(
+      'store1',
+      '{ count: Signal<number>; } & WritableStateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state1', '{ count: number; }');
+
+    expectSnippet(snippet).toInfer(
+      'store2',
+      '{ count: Signal<number>; } & WritableStateSource<{ count: number; }>'
+    );
+
+    expectSnippet(snippet).toInfer('state2', '{ count: number; }');
+
+    expectSnippet(`
+      ${snippet}
+      patchState(store1, { count: 100 });
+      patchState(store2, { count: 100 });
+    `).toSucceed();
+  });
+
   it('patches state via sequence of partial state objects and updater functions', () => {
     expectSnippet(`
       const Store = signalStore(
@@ -475,37 +604,45 @@ describe('signalStore', () => {
             (state) => ({ flags: [...state.flags, true] })
           );
 
+          patchState(
+            store,
+            { flags: [true] },
+            (state) => ({ user: { ...state.user, age: state.user.age + 1 } }),
+            { ngrx: 'store' }
+          );
+
           return {};
         })
-      );
-
-      const store = new Store();
-      patchState(
-        store,
-        { flags: [true] },
-        (state) => ({ user: { ...state.user, age: state.user.age + 1 } }),
-        { ngrx: 'store' }
       );
     `).toSucceed();
   });
 
   it('fails when state is patched with a non-record', () => {
     expectSnippet(`
-      const Store = signalStore(withState({ foo: 'bar' }));
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' })
+      );
 
       const store = new Store();
       patchState(store, 10);
     `).toFail();
 
     expectSnippet(`
-      const Store = signalStore(withState({ foo: 'bar' }));
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' })
+      );
 
       const store = new Store();
       patchState(store, undefined);
     `).toFail();
 
     expectSnippet(`
-      const Store = signalStore(withState({ foo: 'bar' }));
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' })
+      );
 
       const store = new Store();
       patchState(store, [1, 2, 3]);
@@ -514,7 +651,10 @@ describe('signalStore', () => {
 
   it('fails when state is patched with a wrong record', () => {
     expectSnippet(`
-      const Store = signalStore(withState({ foo: 'bar' }));
+      const Store = signalStore(
+        { protectedState: false },
+        withState({ foo: 'bar' })
+      );
 
       const store = new Store();
       patchState(store, { foo: 10 });
@@ -544,6 +684,7 @@ describe('signalStore', () => {
   it('fails when state is patched with a wrong updater function', () => {
     expectSnippet(`
       const Store = signalStore(
+        { protectedState: false },
         withState({ user: { first: 'John', age: 20 } })
       );
 
@@ -591,7 +732,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ ngrx: Signal<string>; x: DeepSignal<{ y: string; }>; signals: Signal<number[]>; mgmt: (arg: boolean) => number; } & StateSignal<{ ngrx: string; x: { y: string; }; }>'
+      '{ ngrx: Signal<string>; x: DeepSignal<{ y: string; }>; signals: Signal<number[]>; mgmt: (arg: boolean) => number; } & StateSource<{ ngrx: string; x: { y: string; }; }>'
     );
   });
 
@@ -619,7 +760,7 @@ describe('signalStore', () => {
 
     expectSnippet(snippet).toInfer(
       'store',
-      '{ foo: Signal<number>; bar: Signal<string>; baz: (x: number) => void; } & StateSignal<{ foo: number; }>'
+      '{ foo: Signal<number>; bar: Signal<string>; baz: (x: number) => void; } & StateSource<{ foo: number; }>'
     );
   });
 
@@ -653,7 +794,7 @@ describe('signalStore', () => {
         return signalStoreFeature(
           {
             state: type<{ q1: string }>(),
-            signals: type<{ sig: Signal<boolean> }>(),
+            computed: type<{ sig: Signal<boolean> }>(),
           },
           withState({ y: initialY }),
           withComputed(() => ({ sigY: computed(() => 'sigY') })),
@@ -723,23 +864,23 @@ describe('signalStore', () => {
         ${baseSnippet}
 
         const Store = signalStore(
-          withComputed(() => ({ sig: computed(() => 1) })),
-          withMethods(() => ({ q1: () => false })),
+          withMethods((store) => ({
+            f() {},
+            g() {},
+          })),
           withComputed(() => ({ sig: computed(() => false) })),
           withState({ q1: 'q1', q2: 'q2' }),
           withX(),
           withY(),
-          withComputed(() => ({ q1: computed(() => 10) })),
-          withMethods((store) => ({
-            f() {
-              patchState(store, { x: 1, y: { a: '', b: 0 }, q2: 'q2new' });
-            },
-          })),
           withZ()
         );
+      `).toSucceed();
+
+      expectSnippet(`
+        ${baseSnippet}
 
         const feature = signalStoreFeature(
-          { signals: type<{ sig: Signal<boolean> }>() },
+          { computed: type<{ sig: Signal<boolean> }>() },
           withX(),
           withState({ q1: 'q1' }),
           withY(),
@@ -766,9 +907,7 @@ describe('signalStore', () => {
         ${baseSnippet}
 
         const Store = signalStore(
-          withComputed(() => ({ sig: computed(() => 1) })),
-          withState({ q1: 'q1', q2: 'q2' }),
-          withState({ q1: 1 }),
+          withState({ q1: 1, q2: 'q2' }),
           withComputed(() => ({ sig: computed(() => false) })),
           withX(),
           withY(),
@@ -785,8 +924,7 @@ describe('signalStore', () => {
         ${baseSnippet}
 
         const feature = signalStoreFeature(
-          { signals: type<{ sig: Signal<boolean> }>() },
-          withComputed(() => ({ sig: computed(() => 1) })),
+          { computed: type<{ sig: Signal<string> }>() },
           withX(),
           withState({ q1: 'q1' }),
           withY(),
@@ -802,32 +940,28 @@ describe('signalStore', () => {
         ${baseSnippet}
 
         const Store = signalStore(
-          withComputed(() => ({ sig: computed(() => 1) })),
-          withState({ q1: 1 }),
           withState({ q1: 'q1', q2: 'q2' }),
           withComputed(() => ({ sig: computed(() => false) })),
           withX(),
-          withY(),
-          withComputed(() => ({ q1: computed(() => 10) })),
           withMethods((store) => ({
             f() {
-              patchState(store, { x: 1, y: { a: '', b: 0 }, q2: 'q2new' });
+              patchState(store, { q1: 'q1new', q2: 'q2new', x: 100 });
             },
-          }))
+            g: (str: string) => console.log(str),
+          })),
+          withY(),
+          withZ(),
         );
 
         const feature = signalStoreFeature(
-          { signals: type<{ sig: Signal<boolean> }>() },
-          withComputed(() => ({ sig: computed(() => 1) })),
+          {
+            computed: type<{ sig: Signal<boolean> }>(),
+            methods: type<{ f(): void; g(arg: string): string; }>(),
+          },
           withX(),
+          withZ(),
           withState({ q1: 'q1' }),
-          withComputed(() => ({ sig: computed(() => false) })),
           withY(),
-          withMethods((store) => ({
-            f() {
-              patchState(store, { x: 1, q1: 'xyz', y: { a: '', b: 0 } });
-            },
-          }))
         );
       `).toSucceed();
     });
@@ -860,7 +994,7 @@ describe('signalStore', () => {
               entities: Entity[];
               selectedEntity: Entity | null;
             };
-            signals: {
+            computed: {
               selectedEntity2: Signal<Entity | undefined>;
             };
             methods: {
